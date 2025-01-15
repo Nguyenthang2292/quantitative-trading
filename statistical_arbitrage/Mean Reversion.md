@@ -27,15 +27,17 @@ Một chuỗi dữ liệu stationary có thể được coi là mean-reverting v
 
 ### 5. Mô hình Mô hình AR(1) (Autoregressive Order 1):
 Phương trình mô hình AR(1):
-**Công thức:**
+\[
+y_t = \mu + \rho y_{t-1} + \epsilon_t
+\]
 
-$y_t = \mu + \rho y_{t-1} + \epsilon_t
+\textbf{Trong đó:}
 
-**Trong đó:**
-
-- \( y_t \): Giá trị tại thời điểm \( t \).
-- \( \mu \): Hằng số trôi dạt (drift).
-- \( \rho \): Hệ số hồi quy (nếu \( |\rho| < 1 \), chuỗi hồi quy về trung bình).
-- \( \epsilon_t \): Thành phần sai số ngẫu nhiên.
-- Nếu \( |\rho| \geq 1 \), chuỗi không hồi quy về trung bình và có thể phân kỳ vô tận.
+\begin{itemize}
+    \item \( y_t \): Giá trị tại thời điểm \( t \).
+    \item \( \mu \): Hằng số trôi dạt (drift).
+    \item \( \rho \): Hệ số hồi quy (nếu \( |\rho| < 1 \), chuỗi hồi quy về trung bình).
+    \item \( \epsilon_t \): Thành phần sai số ngẫu nhiên.
+    \item Nếu \( |\rho| \geq 1 \), chuỗi không hồi quy về trung bình và có thể phân kỳ vô tận.
+\end{itemize}
 
