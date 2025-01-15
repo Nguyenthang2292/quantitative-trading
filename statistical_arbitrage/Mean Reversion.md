@@ -46,7 +46,7 @@ Differencing (lấy sai phân) là một thao tác thường được sử dụn
 
 Đây chính là trường hợp khi lấy sai phân log-price của một tài sản để tính toán log-return (log lợi nhuận). Khi đó, chúng ta nói rằng chuỗi log-price được tích hợp ở bậc 1 (integrated of order 1). Ngoài ra, cũng có thể xem xét sai phân ở bậc cao hơn.
 #### Ví dụ code: 
-Lấy sai phân log-price của một tài sản để tính toán log-return (ví dụ: chuỗi time series của EURUSD với giá đóng cửa close) - kiểm tra tính dừng của ví dụ EURUSD.
+>Lấy sai phân log-price của một tài sản để tính toán log-return (ví dụ: chuỗi time series của EURUSD với giá đóng cửa close) - kiểm tra tính dừng của ví dụ EURUSD trên.
 ```python
 # ========================================================================================================
 # VÍ DỤ STATIONARY CỦA MỘT CHUỖI TIME SERIES
