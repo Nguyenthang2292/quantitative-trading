@@ -27,9 +27,7 @@ Một chuỗi dữ liệu stationary có thể được coi là mean-reverting v
 
 ### 5. Mô hình Mô hình AR(1) (Autoregressive Order 1):
 Phương trình mô hình AR(1):
-\[
-y_t = \mu + \rho y_{t-1} + \epsilon_t
-\]
+$\[y_t = \mu + \rho y_{t-1} + \epsilon_t\]$
 
 \textbf{Trong đó:}
 
