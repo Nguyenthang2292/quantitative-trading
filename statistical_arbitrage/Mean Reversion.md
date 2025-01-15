@@ -42,4 +42,6 @@ Mặc dù **mean reversion (hồi quy về trung bình)** và **unit-root statio
 Differencing (lấy sai phân) là một thao tác thường được sử dụng để đạt được tính dừng (Tsay, 2010, 2013). Nó đề cập đến việc lấy sự chênh lệch giữa các mẫu liên tiếp của chuỗi thời gian $$y_1, y_2, y_3, \ldots$$ để tạo ra:
 >$\Delta y_t = y_t - y_{t-1}$
 
+Ý nghĩa của thao tác này là một chuỗi thời gian không có tính dừng, chẳng hạn như một "random walk" (chuỗi bước ngẫu nhiên), có thể trở thành chuỗi dừng sau khi lấy sai phân (differencing).
 
+Đây chính là trường hợp khi lấy sai phân log-price của một tài sản để tính toán log-return (log lợi nhuận). Khi đó, chúng ta nói rằng chuỗi log-price được tích hợp ở bậc 1 (integrated of order 1). Ngoài ra, cũng có thể xem xét sai phân ở bậc cao hơn.
