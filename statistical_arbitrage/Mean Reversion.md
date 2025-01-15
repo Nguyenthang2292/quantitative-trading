@@ -32,9 +32,9 @@ Phương trình mô hình AR(1):
 **Trong đó:**
 
 - $$y_t$$: Giá trị tại thời điểm $$t$$.
-- $$mu$$: Hằng số trôi dạt (drift).
-- $$rho$$: Hệ số hồi quy (nếu $$|\rho| < 1$$, chuỗi hồi quy về trung bình).
-- $$epsilon_t$$: Thành phần sai số ngẫu nhiên.
+- $$\mu$$: Hằng số trôi dạt (drift).
+- $$\rho$$: Hệ số hồi quy (nếu $$|\rho| < 1$$, chuỗi hồi quy về trung bình).
+- $$\epsilon_t$$: Thành phần sai số ngẫu nhiên.
 - Nếu $$|\rho| \geq 1$$, chuỗi không hồi quy về trung bình và có thể phân kỳ vô tận.
 
 Mặc dù **mean reversion (hồi quy về trung bình)** và **unit-root stationarity (tính dừng không có gốc đơn)** không phải là các khái niệm tương đương nhau, nhưng trong thực tế, tính dừng không có gốc đơn là một đại diện thuận tiện cho mean reversion (Tsay, 2010, 2013). Trên thực tế, việc kiểm tra tính dừng không có gốc đơn là phương pháp tiêu chuẩn để xác định tính hồi quy về trung bình trong thực tế.
