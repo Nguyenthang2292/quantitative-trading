@@ -7,9 +7,9 @@ Hồi quy về trung bình cho phép nhà giao dịch mua ở mức giá thấp 
 Tất nhiên, điều này phụ thuộc vào giả định rằng mối quan hệ lịch sử giữa các tài sản sẽ tiếp tục trong tương lai, điều này tiềm ẩn rủi ro; do đó, việc theo dõi cẩn thận là rất quan trọng.
 
 #### Giải thích:
-1. Mean reversion (hồi quy về trung bình): Đây là chiến lược trong đầu tư và giao dịch cặp tài sản. Nó giả định rằng các tài sản có mối quan hệ chặt chẽ về giá trị sẽ có xu hướng quay trở lại khoảng cách trung bình của chúng sau khi xảy ra biến động.
-2. Giao dịch cặp (Pairs trading): Đây là phương pháp kết hợp hai hoặc nhiều tài sản tương quan để tìm kiếm cơ hội thu lợi nhuận từ sự biến động tương đối giữa các tài sản này.
-3. Rủi ro: Nếu mối quan hệ lịch sử bị phá vỡ hoặc không còn đúng trong tương lai, chiến lược này có thể dẫn đến thua lỗ.
+-Mean reversion (hồi quy về trung bình): Đây là chiến lược trong đầu tư và giao dịch cặp tài sản. Nó giả định rằng các tài sản có mối quan hệ chặt chẽ về giá trị sẽ có xu hướng quay trở lại khoảng cách trung bình của chúng sau khi xảy ra biến động.
+-Giao dịch cặp (Pairs trading): Đây là phương pháp kết hợp hai hoặc nhiều tài sản tương quan để tìm kiếm cơ hội thu lợi nhuận từ sự biến động tương đối giữa các tài sản này.
+-Rủi ro: Nếu mối quan hệ lịch sử bị phá vỡ hoặc không còn đúng trong tương lai, chiến lược này có thể dẫn đến thua lỗ.
 
 ### 2. Các loại Mean Reversion
 #### Longitudinal or Time Series Mean Reversion (Hồi quy về trung bình theo chuỗi thời gian):
@@ -27,9 +27,9 @@ Một chuỗi dữ liệu stationary có thể được coi là mean-reverting v
 
 ### 5. Mô hình Mô hình AR(1) (Autoregressive Order 1):
 Phương trình mô hình AR(1):
-$\[y_t = \mu + \rho y_{t-1} + \epsilon_t\]$
+$y_t = \mu + \rho y_{t-1} + \epsilon_t\$
 
-\textbf{Trong đó:}
+Trong đó:
 
 \begin{itemize}
     \item \( y_t \): Giá trị tại thời điểm \( t \).
