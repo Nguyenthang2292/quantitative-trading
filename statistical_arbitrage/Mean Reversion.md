@@ -100,7 +100,7 @@ plt.show()
 p_value
 ```
 #### Result
-3.0415339027305817e-27
+>3.0415339027305817e-27
 ![output (2)](https://github.com/user-attachments/assets/017517f9-f1fb-43bd-84e1-8cce27ae277f)
 #### Phân tích kết quả kiểm tra tính dừng cho log-return của EUR/USD
 ##### 1. Biểu đồ Log-Price và Log-Return:
