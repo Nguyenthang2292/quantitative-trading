@@ -37,7 +37,7 @@ Phương trình mô hình AR(1):
 - $$\epsilon_t$$: Thành phần sai số ngẫu nhiên.
 - Nếu $$|\rho| \geq 1$$, chuỗi không hồi quy về trung bình và có thể phân kỳ vô tận.
 
-Mặc dù **mean reversion** (hồi quy về trung bình) và **unit-root stationarity** (tính dừng không có gốc đơn) không phải là các khái niệm tương đương nhau, nhưng trong thực tế, tính dừng không có gốc đơn là một đại diện thuận tiện cho mean reversion *(Tsay, 2010, 2013)*. Trên thực tế, việc kiểm tra tính dừng không có gốc đơn là phương pháp tiêu chuẩn để xác định tính hồi quy về trung bình trong thực tế.
+Mặc dù **mean reversion** (hồi quy về trung bình) và **unit-root stationarity** (tính dừng không có gốc đơn) không phải là các khái niệm tương đương nhau, nhưng trong thực tế, tính dừng không có gốc đơn là một đại diện thuận tiện cho **mean reversion** *(Tsay, 2010, 2013)*. Trên thực tế, việc kiểm tra tính dừng không có gốc đơn là phương pháp tiêu chuẩn để xác định tính hồi quy về trung bình trong thực tế.
 
 **Differencing** (lấy sai phân) là một thao tác thường được sử dụng để đạt được tính dừng *(Tsay, 2010, 2013)*. Nó đề cập đến việc lấy sự chênh lệch giữa các mẫu liên tiếp của chuỗi thời gian $$y_1, y_2, y_3, \ldots$$ để tạo ra:
 >$\Delta y_t = y_t - y_{t-1}$
