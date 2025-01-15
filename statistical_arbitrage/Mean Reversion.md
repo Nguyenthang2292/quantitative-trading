@@ -1,6 +1,6 @@
 ## Mean Reversion
 ### 1. Định nghĩa
-Mean reversion (hồi quy về trung bình) là một thuộc tính của chuỗi thời gian (time series), cho thấy chuỗi này sẽ có một giá trị trung bình dài hạn mà xung quanh đó các giá trị có thể dao động theo thời gian, nhưng cuối cùng sẽ quay trở lại mức trung bình này (Chan, 2013; Ehrman, 2006; Vidyamurthy, 2004). Thuộc tính này đóng vai trò quan trọng trong giao dịch cặp, nơi mà chuỗi thời gian hồi quy về trung bình được tạo ra bằng cách kết hợp hai (hoặc nhiều) tài sản.
+Mean reversion (hồi quy về trung bình) là một thuộc tính của chuỗi thời gian (time series), cho thấy chuỗi này sẽ có một giá trị trung bình dài hạn mà xung quanh đó các giá trị có thể dao động theo thời gian, nhưng cuối cùng sẽ quay trở lại mức trung bình này *(Chan, 2013; Ehrman, 2006; Vidyamurthy, 2004)*. Thuộc tính này đóng vai trò quan trọng trong giao dịch cặp, nơi mà chuỗi thời gian hồi quy về trung bình được tạo ra bằng cách kết hợp hai (hoặc nhiều) tài sản.
 
 Hồi quy về trung bình cho phép nhà giao dịch mua ở mức giá thấp với kỳ vọng rằng giá sẽ quay trở lại mức trung bình dài hạn theo thời gian. Khi giá quay lại mức trung bình lịch sử, nhà giao dịch sẽ đóng vị thế để hiện thực hóa lợi nhuận.
 
