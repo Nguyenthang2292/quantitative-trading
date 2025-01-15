@@ -45,3 +45,57 @@ Differencing (lấy sai phân) là một thao tác thường được sử dụn
 Ý nghĩa của thao tác này là một chuỗi thời gian không có tính dừng, chẳng hạn như một "random walk" (chuỗi bước ngẫu nhiên), có thể trở thành chuỗi dừng sau khi lấy sai phân (differencing).
 
 Đây chính là trường hợp khi lấy sai phân log-price của một tài sản để tính toán log-return (log lợi nhuận). Khi đó, chúng ta nói rằng chuỗi log-price được tích hợp ở bậc 1 (integrated of order 1). Ngoài ra, cũng có thể xem xét sai phân ở bậc cao hơn.
+#### Ví dụ code: 
+Lấy sai phân log-price của một tài sản để tính toán log-return (ví dụ: chuỗi time series của EURUSD với giá đóng cửa close) - kiểm tra tính dừng của ví dụ EURUSD.
+```
+# ========================================================================================================
+# VÍ DỤ STATIONARY CỦA MỘT CHUỖI TIME SERIES
+# ví dụ code Lấy sai phân log-price của một tài sản để tính toán log-return (log lợi nhuận) 
+# (ví dụ: chuỗi time series của EURUSD với giá đóng cửa close) - kiểm tra tính dừng của ví dụ EURUSD
+# ========================================================================================================
+# Import các thư viện cần thiết
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.stattools import adfuller
+
+# Tạo chuỗi thời gian giả lập giá đóng cửa của cặp EUR/USD
+np.random.seed(42)
+T = 200  # số lượng điểm dữ liệu
+initial_price = 1.1  # giá ban đầu
+returns = np.random.normal(0, 0.001, T)  # lợi nhuận ngẫu nhiên nhỏ
+prices = initial_price * np.exp(np.cumsum(returns))  # chuỗi giá giả lập
+
+# Tạo DataFrame chứa giá đóng cửa EUR/USD
+df = pd.DataFrame({'Close': prices}, index=pd.date_range(start='2022-01-01', periods=T))
+
+# Tính toán log-price và log-return (lấy sai phân)
+df['Log_Close'] = np.log(df['Close'])  # log-price
+df['Log_Return'] = df['Log_Close'].diff()  # log-return (sai phân)
+
+# Kiểm tra tính dừng bằng Augmented Dickey-Fuller (ADF) Test cho log-return
+adf_result = adfuller(df['Log_Return'].dropna())
+p_value = adf_result[1]
+
+# Vẽ biểu đồ log-price và log-return
+plt.figure(figsize=(14, 6))
+
+plt.subplot(2, 1, 1)
+plt.plot(df['Log_Close'], label='Log-Price (EUR/USD)', color='blue')
+plt.title('Log-Price of EUR/USD')
+plt.xlabel('Time')
+plt.ylabel('Log-Price')
+plt.legend()
+
+plt.subplot(2, 1, 2)
+plt.plot(df['Log_Return'], label='Log-Return (Differencing)', color='orange')
+plt.title('Log-Return (First Differencing)')
+plt.xlabel('Time')
+plt.ylabel('Log-Return')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+p_value
+```
