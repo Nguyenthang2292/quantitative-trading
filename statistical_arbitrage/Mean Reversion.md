@@ -31,7 +31,6 @@ Phương trình mô hình AR(1):
 
 Trong đó:
 
-
 -$y_t$: Giá trị tại thời điểm $t$.
 -$mu$: Hằng số trôi dạt (drift).
 -$rho$: Hệ số hồi quy (nếu $|\rho| < 1$, chuỗi hồi quy về trung bình).
