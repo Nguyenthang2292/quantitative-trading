@@ -1,6 +1,6 @@
 ## Mean Reversion
 ### 1. Định nghĩa
-Mean reversion (hồi quy về trung bình) là một thuộc tính của chuỗi thời gian (time series), cho thấy chuỗi này sẽ có một giá trị trung bình dài hạn mà xung quanh đó các giá trị có thể dao động theo thời gian, nhưng cuối cùng sẽ quay trở lại mức trung bình này *(Chan, 2013; Ehrman, 2006; Vidyamurthy, 2004)*. Thuộc tính này đóng vai trò quan trọng trong giao dịch cặp, nơi mà chuỗi thời gian hồi quy về trung bình được tạo ra bằng cách kết hợp hai (hoặc nhiều) tài sản.
+**Mean reversion** (hồi quy về trung bình) là một thuộc tính của chuỗi thời gian **(time series)**, cho thấy chuỗi này sẽ có một giá trị trung bình dài hạn mà xung quanh đó các giá trị có thể dao động theo thời gian, nhưng cuối cùng sẽ quay trở lại mức trung bình này *(Chan, 2013; Ehrman, 2006; Vidyamurthy, 2004)*. Thuộc tính này đóng vai trò quan trọng trong giao dịch cặp, nơi mà chuỗi thời gian hồi quy về trung bình được tạo ra bằng cách kết hợp hai (hoặc nhiều) tài sản.
 
 Hồi quy về trung bình cho phép nhà giao dịch mua ở mức giá thấp với kỳ vọng rằng giá sẽ quay trở lại mức trung bình dài hạn theo thời gian. Khi giá quay lại mức trung bình lịch sử, nhà giao dịch sẽ đóng vị thế để hiện thực hóa lợi nhuận.
 
@@ -37,16 +37,16 @@ Phương trình mô hình AR(1):
 - $$\epsilon_t$$: Thành phần sai số ngẫu nhiên.
 - Nếu $$|\rho| \geq 1$$, chuỗi không hồi quy về trung bình và có thể phân kỳ vô tận.
 
-Mặc dù **mean reversion (hồi quy về trung bình)** và **unit-root stationarity (tính dừng không có gốc đơn)** không phải là các khái niệm tương đương nhau, nhưng trong thực tế, tính dừng không có gốc đơn là một đại diện thuận tiện cho mean reversion (Tsay, 2010, 2013). Trên thực tế, việc kiểm tra tính dừng không có gốc đơn là phương pháp tiêu chuẩn để xác định tính hồi quy về trung bình trong thực tế.
+Mặc dù **mean reversion** (hồi quy về trung bình) và **unit-root stationarity** (tính dừng không có gốc đơn) không phải là các khái niệm tương đương nhau, nhưng trong thực tế, tính dừng không có gốc đơn là một đại diện thuận tiện cho mean reversion *(Tsay, 2010, 2013)*. Trên thực tế, việc kiểm tra tính dừng không có gốc đơn là phương pháp tiêu chuẩn để xác định tính hồi quy về trung bình trong thực tế.
 
-Differencing (lấy sai phân) là một thao tác thường được sử dụng để đạt được tính dừng (Tsay, 2010, 2013). Nó đề cập đến việc lấy sự chênh lệch giữa các mẫu liên tiếp của chuỗi thời gian $$y_1, y_2, y_3, \ldots$$ để tạo ra:
+**Differencing** (lấy sai phân) là một thao tác thường được sử dụng để đạt được tính dừng (Tsay, 2010, 2013). Nó đề cập đến việc lấy sự chênh lệch giữa các mẫu liên tiếp của chuỗi thời gian $$y_1, y_2, y_3, \ldots$$ để tạo ra:
 >$\Delta y_t = y_t - y_{t-1}$
 
-Ý nghĩa của thao tác này là một chuỗi thời gian không có tính dừng, chẳng hạn như một "random walk" (chuỗi bước ngẫu nhiên), có thể trở thành chuỗi dừng sau khi lấy sai phân (differencing).
+Ý nghĩa của thao tác này là một chuỗi thời gian không có tính dừng, chẳng hạn như một **"random walk"** (chuỗi bước ngẫu nhiên), có thể trở thành chuỗi dừng sau khi lấy sai phân **(differencing)**.
 
-Đây chính là trường hợp khi lấy sai phân log-price của một tài sản để tính toán log-return (log lợi nhuận). Khi đó, chúng ta nói rằng chuỗi log-price được tích hợp ở bậc 1 (integrated of order 1). Ngoài ra, cũng có thể xem xét sai phân ở bậc cao hơn.
+Đây chính là trường hợp khi lấy sai phân **log-price** của một tài sản để tính toán **log-return**. Khi đó, chúng ta nói rằng chuỗi log-price được tích hợp ở bậc 1 **(integrated of order 1)**. Ngoài ra, cũng có thể xem xét sai phân ở bậc cao hơn.
 #### Ví dụ code: 
->Lấy sai phân log-price của một tài sản để tính toán log-return (ví dụ: chuỗi time series của EURUSD với giá đóng cửa close) - kiểm tra tính dừng của ví dụ EURUSD trên.
+>Lấy sai phân **log-price** của một tài sản để tính toán **log-return** (ví dụ: chuỗi time series của EURUSD với giá đóng cửa close) - kiểm tra tính dừng của ví dụ EURUSD trên.
 ```python
 # ========================================================================================================
 # VÍ DỤ STATIONARY CỦA MỘT CHUỖI TIME SERIES
