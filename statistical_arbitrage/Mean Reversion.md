@@ -99,3 +99,17 @@ plt.show()
 
 p_value
 ```
+#### Result
+3.0415339027305817e-27
+![output (2)](https://github.com/user-attachments/assets/017517f9-f1fb-43bd-84e1-8cce27ae277f)
+#### Phân tích kết quả kiểm tra tính dừng cho log-return của EUR/USD
+##### 1. Biểu đồ Log-Price và Log-Return:
+- **Log-Price (trên)**: Chuỗi log-price biến động dần theo thời gian, có xu hướng tăng hoặc giảm, không cố định quanh mức trung bình → Có thể là chuỗi không dừng.
+- **Log-Return (dưới)**: Chuỗi log-return là sai phân bậc 1 của log-price. Biểu đồ cho thấy chuỗi này dao động quanh mức 0 mà không có xu hướng tăng hoặc giảm dài hạn rõ ràng.
+##### 2. Kết quả kiểm tra ADF Test (Augmented Dickey-Fuller):
+- **P-value**: $$\approx 3.04 \times 10^{-27}$$, nhỏ hơn 0.05 $$\Rightarrow$$ Bác bỏ giả thuyết $$H_0$$.
+- **Kết luận**: Chuỗi log-return có tính dừng $$\Rightarrow$$ Đây là một chuỗi *stationary* sau khi lấy sai phân bậc 1.
+Kết luận: Chuỗi log-return có tính dừng → Đây là một chuỗi stationary sau khi lấy sai phân bậc 1.
+#### Tóm lại:
+- Chuỗi giá log-price ban đầu không có tính dừng.
+- Sau khi lấy sai phân log-price (log-return), chuỗi trở thành dừng, phù hợp với lý thuyết mean reversion và kiểm tra tính stationarity trong chuỗi thời gian tài chính.
