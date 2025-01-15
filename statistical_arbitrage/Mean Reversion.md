@@ -111,4 +111,4 @@ p_value
 - **Kết luận**: Chuỗi *log-return* có tính dừng $$\Rightarrow$$ Đây là một chuỗi *stationary* sau khi lấy sai phân bậc 1.
 #### Tóm lại:
 - Chuỗi giá *log-price* ban đầu không có tính dừng.
-- Sau khi lấy sai phân *log-price (log-return)*, chuỗi trở thành dừng, phù hợp với lý thuyết *mean reversion* và kiểm tra tính *stationarity* trong chuỗi *time-series*.
+- Sau khi lấy sai phân *log-price (log-return)*, chuỗi trở thành dừng, phù hợp với lý thuyết *mean reversion* trong chuỗi *time-series*.
