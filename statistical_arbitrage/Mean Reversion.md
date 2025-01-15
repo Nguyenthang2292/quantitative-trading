@@ -29,7 +29,7 @@ Một chuỗi dữ liệu stationary có thể được coi là mean-reverting v
 Phương trình mô hình AR(1):
 **Công thức:**
 
-\( y_t = \mu + \rho y_{t-1} + \epsilon_t \)
+$y_t = \mu + \rho y_{t-1} + \epsilon_t
 
 **Trong đó:**
 
