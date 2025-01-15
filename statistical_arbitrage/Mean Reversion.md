@@ -29,12 +29,13 @@ Một chuỗi dữ liệu stationary có thể được coi là mean-reverting v
 Phương trình mô hình AR(1):
 >$y_t = \mu + \rho y_{t-1} + \epsilon_t\$
 
-Trong đó:
+**Trong đó:**
 
--<span>$</span>y_t: Giá trị tại thời điểm t$.
--$mu$: Hằng số trôi dạt (drift).
--$rho$: Hệ số hồi quy (nếu $|\rho| < 1$, chuỗi hồi quy về trung bình).
--$epsilon_t$: Thành phần sai số ngẫu nhiên.
--Nếu $|\rho| \geq 1$, chuỗi không hồi quy về trung bình và có thể phân kỳ vô tận.
+$$- \( y_t \): Giá trị tại thời điểm \( t \).
+- \( \mu \): Hằng số trôi dạt (drift).
+- \( \rho \): Hệ số hồi quy (nếu \( |\rho| < 1 \), chuỗi hồi quy về trung bình).
+- \( \epsilon_t \): Thành phần sai số ngẫu nhiên.
+- Nếu \( |\rho| \geq 1 \), chuỗi không hồi quy về trung bình và có thể phân kỳ vô tận.$$
+
 
 
