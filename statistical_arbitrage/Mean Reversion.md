@@ -23,7 +23,7 @@ Ví dụ: Giá tài sản dao động quanh mức trung bình và cuối cùng t
 >"Tính dừng **(stationary)** là thuộc tính của chuỗi thời gian mà trong đó trung bình **(Mean)**, phương sai **(Variance)**, và hiệp phương sai **(Covariance)** không thay đổi theo thời gian.
 Một chuỗi dữ liệu stationary có thể được coi là mean-reverting vì các tham số của nó luôn cố định."
 ### 4. Unit-Root Stationarity (Tính dừng không có gốc đơn)
->Unit Root: Nếu một chuỗi có **"unit root"**, nó sẽ không có tính dừng **(stationary)** mà có xu hướng diverge (phân kỳ) thay vì hồi quy về trung bình. Chuỗi **random walk** là một ví dụ điển hình của chuỗi có unit root.
+>Unit Root: Nếu một chuỗi có **"unit root"**, nó sẽ không có tính dừng **(stationary)** mà có xu hướng phân kỳ **(diverge)** thay vì hồi quy về trung bình. Chuỗi **random walk** là một ví dụ điển hình của chuỗi có **unit root**.
 
 ### 5. Mô hình Mô hình AR(1) (Autoregressive Order 1):
 Phương trình mô hình AR(1):
