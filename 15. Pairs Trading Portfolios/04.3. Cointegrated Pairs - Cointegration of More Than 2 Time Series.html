@@ -1,0 +1,231 @@
+<!DOCTYPE html><html><head>
+      <title>04.3. Cointegrated Pairs - Cointegration of More Than 2 Time Series</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:///c:\Users\nguye\.vscode\extensions\shd101wyy.markdown-preview-enhanced-0.8.15\crossnote\dependencies\katex\katex.min.css">
+      
+      
+      
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <!-- The content below will be included at the end of the <head> element. --><script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script></head><body for="html-export">
+    
+    
+      <div class="crossnote markdown-preview  ">
+      
+<p><em><strong>Bản quyền dịch thuật và diễn giải thuộc về justinnguyen92© - <a href="https://t.me/justinnguyen92">telegram</a></strong></em></p>
+<h2 id="1-cointegration-of-more-than-two-time-series-đồng-tích-hợp-hơn-hai-chuỗi-thời-gian">1. Cointegration of More Than Two Time Series (Đồng Tích Hợp Hơn Hai Chuỗi Thời Gian) </h2>
+<p>Kiểm định <em>cointegration Engle–Granger</em> có một số hạn chế:</p>
+<ul>
+<li>Nó được thiết kế cho hai chuỗi thời gian (hoặc hai tài sản).</li>
+<li>Thậm chí trong trường hợp này, bước hồi quy một chuỗi thời gian theo chuỗi thời gian khác phụ thuộc vào thứ tự của các biến.<br>
+Mặc dù phương pháp này có thể được mở rộng tự nhiên cho nhiều hơn hai chuỗi tài sản, nhưng thứ tự sắp xếp các biến trở nên rất quan trọng.</li>
+</ul>
+<p><strong>Phương pháp thay thế:</strong></p>
+<ul>
+<li><strong>Kiểm định <em>Johansen (Johansen, 1991, 1995)</em></strong>: Dựa trên mô hình chuỗi thời gian đa biến <em>(multivariate time series)</em>.<br>
+Kiểm định này phù hợp với mô hình <em>VECM (Vector Error Correction Model)</em> cho <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> tài sản.<br>
+Mô hình này tạo ra một ma trận <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>×</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">N × N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> đặc trưng cho mối quan hệ <em>cointegration</em> giữa các chuỗi.<br>
+→ Bằng cách phân tích hạng của ma trận này, ta có thể xác định số lượng mối quan hệ <em>cointegration</em> có trong dữ liệu.</li>
+</ul>
+<p><strong>Giải thích:</strong></p>
+<ul>
+<li><em>Engle-Granger Test</em>: Tốt cho hai chuỗi nhưng khó áp dụng cho nhiều chuỗi vì thứ tự các chuỗi có thể làm thay đổi kết quả.</li>
+<li><em>Johansen Test</em>: Cho phép kiểm tra <em>cointegration</em> với nhiều chuỗi tài sản và không phụ thuộc vào thứ tự biến đầu vào.<br>
+Ví dụ: Nếu có ba tài sản A, B, C, kiểm định <em>Johansen</em> sẽ xác định có bao nhiêu cặp <em>cointegration</em> trong ba tài sản đó.</li>
+</ul>
+<h2 id="2-are-cointegrated-pairs-persistent-cặp-đồng-tích-hợp-có-ổn-định-không">2. Are Cointegrated Pairs Persistent? (Cặp Đồng Tích Hợp Có Ổn Định Không?) </h2>
+<p>Có thể bạn nghĩ rằng sau khi một cặp <em>cointegration</em> được phát hiện và vượt qua các kiểm định cần thiết, công việc đã hoàn thành và chiến lược <em>pairs trading</em> sẽ mang lại lợi nhuận. Tuy nhiên, một câu hỏi cần đặt ra là liệu mối quan hệ <em>cointegration</em> này có ổn định theo thời gian hay không.</p>
+<p><strong>Thực tế:</strong></p>
+<ul>
+<li>Không khó để tìm thấy các cặp <em>cointegration</em> trong một giai đoạn dữ liệu lịch sử nhất định, nhưng những cặp này có thể mất đi tính <em>cointegration</em> trong giai đoạn sau <em>(Chan, 2013)</em>.</li>
+<li>Nguyên nhân:
+<ul>
+<li>Giá trị tài sản của một công ty có thể thay đổi nhanh chóng do các quyết định quản lý, sự cạnh tranh hoặc các tin tức tiêu cực ảnh hưởng đến một công ty nhưng không ảnh hưởng đến công ty khác.</li>
+</ul>
+</li>
+</ul>
+<p>Các nghiên cứu thực nghiệm cho thấy bằng chứng không ủng hộ giả thuyết rằng tính cointegration luôn ổn định theo thời gian <em>(Clegg, 2014)</em>.</p>
+<ul>
+<li><em>Spread</em> của các cặp <em>cointegration</em> thường bị ảnh hưởng bởi các cú sốc dài hạn có thể làm mất đi sự <em>cointegration</em>.</li>
+</ul>
+<p><strong>Giải pháp:</strong></p>
+<ul>
+<li>Xem xét các phiên bản <em>cointegration</em> thay đổi theo thời gian <em>(time-varying cointegration)</em>, chẳng hạn như sử dụng lọc <em>Kalman (Kalman Filtering)</em> để ước lượng mối quan hệ <em>cointegration</em> thay đổi dần theo thời gian.</li>
+<li>Có thể áp dụng các dạng <em>cointegration</em> linh hoạt hơn, chẳng hạn như khái niệm <em>cointegration</em> từng phần <em>(partial cointegration)</em>, cho phép chuỗi <em>spread</em> có thành phần <em>random walk</em>.</li>
+</ul>
+<p><strong>Giải thích:</strong></p>
+<ul>
+<li><strong>Cặp <em>cointegration</em> có ổn định không?:</strong> Mối quan hệ <em>cointegration</em> có thể thay đổi và không ổn định do các yếu tố bên ngoài như tin tức, quản lý doanh nghiệp hoặc sự cạnh tranh trong thị trường.</li>
+<li><strong>Lọc Kalman:</strong> Phương pháp giúp mô hình hóa sự thay đổi động của mối quan hệ <em>cointegration</em> giữa các chuỗi thời gian.</li>
+</ul>
+<p><strong>Tóm tắt:</strong></p>
+<ul>
+<li><strong>Kiểm định <em>Johansen</em></strong>: Cho phép kiểm định <em>cointegration</em> nhiều hơn hai chuỗi thời gian một cách chính xác và linh hoạt.</li>
+<li><strong>Tính ổn định của cặp <em>cointegration:</em></strong> Không phải lúc nào cũng bền vững theo thời gian; các sự kiện thị trường có thể phá vỡ mối quan hệ này. Sử dụng các công cụ như <em>Kalman Filtering</em> hoặc mô hình <em>cointegration</em> từng phần giúp khắc phục nhược điểm này.</li>
+</ul>
+<h4 id="ví-dụ-code">Ví dụ code: </h4>
+<p>Kiểm định <em>johansen</em> cho một tập hợp ví dụ: <code>pairs = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD"]</code></p>
+<pre data-role="codeBlock" data-info="python" class="language-python python"><code><span class="token comment"># Import các thư viện cần thiết</span>
+<span class="token keyword keyword-import">import</span> numpy <span class="token keyword keyword-as">as</span> np
+<span class="token keyword keyword-import">import</span> pandas <span class="token keyword keyword-as">as</span> pd
+<span class="token keyword keyword-from">from</span> statsmodels<span class="token punctuation">.</span>tsa<span class="token punctuation">.</span>vector_ar<span class="token punctuation">.</span>vecm <span class="token keyword keyword-import">import</span> coint_johansen
+
+<span class="token comment"># Tạo chuỗi dữ liệu giả lập cho các cặp tiền tệ</span>
+np<span class="token punctuation">.</span>random<span class="token punctuation">.</span>seed<span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span>
+T <span class="token operator">=</span> <span class="token number">200</span>  <span class="token comment"># Số lượng điểm dữ liệu</span>
+pairs <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">"EURUSD"</span><span class="token punctuation">,</span> <span class="token string">"GBPUSD"</span><span class="token punctuation">,</span> <span class="token string">"USDJPY"</span><span class="token punctuation">,</span> <span class="token string">"AUDUSD"</span><span class="token punctuation">,</span> <span class="token string">"USDCAD"</span><span class="token punctuation">,</span> <span class="token string">"USDCHF"</span><span class="token punctuation">,</span> <span class="token string">"NZDUSD"</span><span class="token punctuation">]</span>
+prices_data <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token comment"># Giả lập dữ liệu giá đóng cửa cho mỗi cặp tiền tệ</span>
+<span class="token keyword keyword-for">for</span> pair <span class="token keyword keyword-in">in</span> pairs<span class="token punctuation">:</span>
+    initial_price <span class="token operator">=</span> np<span class="token punctuation">.</span>random<span class="token punctuation">.</span>uniform<span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">)</span>  <span class="token comment"># Giá ban đầu ngẫu nhiên</span>
+    returns <span class="token operator">=</span> np<span class="token punctuation">.</span>random<span class="token punctuation">.</span>normal<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.01</span><span class="token punctuation">,</span> T<span class="token punctuation">)</span>  <span class="token comment"># Lợi nhuận ngẫu nhiên</span>
+    prices_data<span class="token punctuation">[</span>pair<span class="token punctuation">]</span> <span class="token operator">=</span> initial_price <span class="token operator">*</span> np<span class="token punctuation">.</span>exp<span class="token punctuation">(</span>np<span class="token punctuation">.</span>cumsum<span class="token punctuation">(</span>returns<span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment"># Giá đóng cửa giả lập</span>
+
+<span class="token comment"># Tạo DataFrame chứa giá đóng cửa của tất cả các cặp tiền tệ</span>
+df_prices <span class="token operator">=</span> pd<span class="token punctuation">.</span>DataFrame<span class="token punctuation">(</span>prices_data<span class="token punctuation">,</span> index<span class="token operator">=</span>pd<span class="token punctuation">.</span>date_range<span class="token punctuation">(</span>start<span class="token operator">=</span><span class="token string">'2022-01-01'</span><span class="token punctuation">,</span> periods<span class="token operator">=</span>T<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token comment"># Chạy kiểm định Johansen cho tập hợp các cặp tiền tệ</span>
+johansen_test_result <span class="token operator">=</span> coint_johansen<span class="token punctuation">(</span>df_prices<span class="token punctuation">,</span> det_order<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span> k_ar_diff<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+<span class="token comment"># In kết quả kiểm định Johansen</span>
+<span class="token keyword keyword-print">print</span><span class="token punctuation">(</span><span class="token string">"Eigenvalue Test Statistics:"</span><span class="token punctuation">)</span>
+<span class="token keyword keyword-print">print</span><span class="token punctuation">(</span>johansen_test_result<span class="token punctuation">.</span>lr1<span class="token punctuation">)</span>
+<span class="token keyword keyword-print">print</span><span class="token punctuation">(</span><span class="token string">"\nCritical Values:"</span><span class="token punctuation">)</span>
+<span class="token keyword keyword-print">print</span><span class="token punctuation">(</span>johansen_test_result<span class="token punctuation">.</span>cvt<span class="token punctuation">)</span>
+
+<span class="token comment"># In kết luận về số lượng đồng tích hợp</span>
+rank <span class="token operator">=</span> <span class="token builtin">sum</span><span class="token punctuation">(</span>johansen_test_result<span class="token punctuation">.</span>lr1 <span class="token operator">&gt;</span> johansen_test_result<span class="token punctuation">.</span>cvt<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword keyword-print">print</span><span class="token punctuation">(</span><span class="token string-interpolation"><span class="token string">f"\nSố lượng mối quan hệ đồng tích hợp: </span><span class="token interpolation"><span class="token punctuation">{</span>rank<span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">)</span>
+</code></pre><h5 id="stdoutstderr">STDOUT/STDERR </h5>
+<p><img src="https://github.com/user-attachments/assets/3a89f701-5943-4fc3-914c-4710833f4c88" alt="image"></p>
+<h4 id="kết-quả-kiểm-định-johansen-cho-tập-hợp-các-cặp-tiền-tệ">Kết quả Kiểm định Johansen cho tập hợp các cặp tiền tệ: </h4>
+<ul>
+<li><strong>Eigenvalue Test Statistics:</strong> Đây là các giá trị thống kê kiểm định cho từng cặp giá trị riêng.</li>
+<li><strong>Critical Values:</strong> Các giá trị tới hạn ở các mức ý nghĩa 10%, 5% và 1%.</li>
+</ul>
+<h4 id="kết-luận">Kết luận: </h4>
+<ul>
+<li>Số lượng mối quan hệ <em>cointegration</em> được phát hiện là 0.<br>
+→ Không có mối quan hệ <em>cointegration</em> đáng kể giữa các chuỗi giá đóng cửa của các cặp tiền tệ trong tập hợp dữ liệu giả lập này.</li>
+</ul>
+<h4 id="giải-thích">Giải thích: </h4>
+<ul>
+<li>Nếu một thống kê kiểm định lớn hơn giá trị tới hạn tại một mức ý nghĩa nhất định (ví dụ 5%), ta có thể bác bỏ giả thuyết không và kết luận rằng có tồn tại mối quan hệ <em>cointegration</em>.</li>
+<li>Trong trường hợp này, tất cả các giá trị thống kê đều không đủ lớn để vượt qua ngưỡng tới hạn, do đó không có cặp <em>cointegration</em> giữa các chuỗi.<br>
+Nếu bạn muốn thử nghiệm với dữ liệu thực tế hoặc tinh chỉnh số lượng bậc trễ (k__ar__diff) và các thông số khác, điều này có thể dẫn đến các kết quả khác nhau.​</li>
+</ul>
+<h2 id="3-ví-dụ">3. Ví dụ </h2>
+<p>Ví dụ này trình bày dữ liệu chuỗi thời gian tổng hợp với mối quan hệ <em>cointegration</em> nhưng có mức độ <em>correlation</em> thấp giữa hai chuỗi thời gian.<br>
+Nhớ lại Ví dụ 15.1 và Hình 15.4 tương ứng <a href="https://github.com/Nguyenthang2292/quantitative-trading/blob/main/statistical_arbitrage/04.%20Cointegration%20and%20Correlation.md">link</a>, trong đó chuỗi thời gian <em>cointegration</em> tổng hợp được tạo ra với <em>correlation</em> thấp. Mối quan hệ <em>cointegration</em> ước tính thông qua bình phương nhỏ nhất <em>(least squares)</em> dựa trên <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>200</mn></mrow><annotation encoding="application/x-tex">T=200</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">200</span></span></span></span> quan sát là:</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>y</mi><mrow><mn>2</mn><mi>t</mi></mrow></msub><mo>=</mo><mn>0.80</mn><mo>⋅</mo><msub><mi>y</mi><mrow><mn>1</mn><mi>t</mi></mrow></msub><mo>+</mo><mn>0.20</mn><mo>+</mo><msub><mi>r</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">y_{2t} = 0.80 \cdot y_{1t} + 0.20 + r_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.80</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0.20</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p><strong>Trong đó:</strong></p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">r_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>: Là phần dư với hệ số tự hồi quy bậc 1:</li>
+</ul>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo>=</mo><mn>0.12</mn><mo>⋅</mo><msub><mi>r</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">r_t = 0.12 \cdot r_{t-1} + \epsilon_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.12</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">ϵ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\epsilon_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">ϵ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>: Là nhiễu trắng <em>(white noise)</em>.</li>
+</ul>
+<h3 id="phân-tích-chi-tiết">Phân tích chi tiết: </h3>
+<ol>
+<li><strong>Hệ số tự hồi quy 0.12 <em>(autoregressive coefficient)</em>:</strong></li>
+</ol>
+<ul>
+<li>Hệ số này khá nhỏ, chứng tỏ chuỗi phần dư có xu hướng quay về trung bình một cách nhanh chóng (tính hồi quy mạnh mẽ về trung bình).</li>
+</ul>
+<ol start="2">
+<li>
+<p><strong>Thời gian bán rã <em>(Half-life)</em>:</strong></p>
+<ul>
+<li>Thời gian bán rã ước tính là 0.33 kỳ, nghĩa là chuỗi phần dư chỉ mất 0.33 đơn vị thời gian để quay lại một nửa khoảng cách đến mức trung bình. Điều này chứng minh rằng chuỗi phần dư có tính dừng.</li>
+</ul>
+</li>
+<li>
+<p><strong>Biểu đồ phần dư <em>(Residual)</em>:</strong></p>
+<ul>
+<li>Biểu đồ phần dư thể hiện dao động xung quanh mức trung bình (0) mà không phân kỳ, đây là dấu hiệu rõ ràng về kết quả của kiểm định dừng.</li>
+</ul>
+</li>
+</ol>
+<p><img src="https://github.com/user-attachments/assets/650443bd-ac0a-4645-b9f8-cd4e3bb24e81" alt="image"></p>
+<h3 id="bảng-kiểm-định-tính-dừng-của-phần-dư-residual">Bảng kiểm định tính dừng của phần dư <em>(Residual)</em>: </h3>
+<table>
+<thead>
+<tr>
+<th><strong>Kiểm định</strong></th>
+<th><strong>P-value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ADF (Augmented Dickey-Fuller)</td>
+<td>0.0081</td>
+</tr>
+<tr>
+<td>PP (Phillips-Perron)</td>
+<td>0.0001</td>
+</tr>
+<tr>
+<td>PGFF</td>
+<td>0.0001</td>
+</tr>
+<tr>
+<td>ERSD</td>
+<td>0.0008</td>
+</tr>
+<tr>
+<td>JOT (Johansen's Trace Test)</td>
+<td>0.0001</td>
+</tr>
+<tr>
+<td>SPR (Schmidt-Phillips rho)</td>
+<td>0.0001</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>P-value rất nhỏ (&lt; 0.01):</strong>
+<ul>
+<li>→ Bác bỏ giả thuyết không (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">H_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0813em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>: tồn tại gốc đơn), kết luận rằng chuỗi phần dư là chuỗi dừng.</li>
+<li>→ Điều này chứng minh rằng hai chuỗi thời gian có mối quan hệ đồng tích hợp mạnh.</li>
+</ul>
+</li>
+</ul>
+<h3 id="giải-thích-ý-nghĩa-các-kiểm-định">Giải thích ý nghĩa các kiểm định: </h3>
+<ul>
+<li><strong>ADF:</strong> Bổ sung các bậc trễ để kiểm tra gốc đơn <em>(unit-root)</em>.</li>
+<li><strong>PP:</strong> Thích hợp để kiểm tra tính dừng khi chuỗi có phương sai <em>(variant)</em> không ổn định.</li>
+<li><strong>PGFF, ERSD:</strong> Là các kiểm định mở rộng của ADF với các giả thiết khác nhau về xu hướng và hằng số <em>(constant)</em>.</li>
+<li><strong>JOT:</strong> Kiểm định <em>Johansen</em> phù hợp cho nhiều chuỗi thời gian.</li>
+<li><strong>SPR:</strong> Một biến thể của kiểm định PP với cách đo lường khác (<em>rho-statistic</em>).</li>
+</ul>
+<h3 id="kết-luận-1">Kết luận: </h3>
+<ul>
+<li>Ví dụ này cho thấy mặc dù hai chuỗi có hệ số tương quan thấp, nhưng kiểm định <em>cointegration</em> chứng minh rằng chúng có mối quan hệ dài hạn ổn định.</li>
+<li>Chuỗi phần dư từ mô hình hồi quy thể hiện tính hồi quy về trung bình mạnh với thời gian bán rã rất ngắn, điều này phù hợp với kỳ vọng khi xây dựng mô hình <em>pairs trading</em> dựa trên hồi quy về trung bình.</li>
+</ul>
+
+      </div>
+      
+      
+    
+    
+    
+    
+    
+    
+  
+    </body></html>
