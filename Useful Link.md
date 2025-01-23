@@ -27,21 +27,17 @@ https://machinelearningmastery.com/products/
 ## Introduction & Collections
 
 Liu Peng
-
 - https://youtube.com/playlist?list=PLA2Lu2TlMqzVPeD043744URgdejZf1vlr&si=3tjhwIeTegsR1u4O
 
 (Quantopian) quantrocket-codeload/quant-finance-lectures 
-
 - https://github.com/quantrocket-codeload/quant-finance-lectures/blob/master/quant_finance_lectures/Lecture42-Introduction-to-Pairs-Trading.ipynb
 
 - https://gist.github.com/ih2502mk/50d8f7feb614c8676383431b056f4291
 
 Portfolio Optimization
-
 - https://bookdown.org/palomar/portfoliooptimizationbook/15.1-mean-reversion.html
 
 TheQuantPy
-
 - https://github.com/TheQuantPy/youtube-tutorials
 
 ---
@@ -63,21 +59,15 @@ TheQuantPy
 ![alt text](UsefulLink_img/image-2.png)
 
 Calculating S/R in python using K-means Clustering
-
 - https://www.alpharithms.com/calculating-support-resistance-in-python-using-k-means-clustering-101517/
 
 #### Momentum
 
 Fast trend following
-
 - https://open.substack.com/pub/quantitativo/p/fast-trend-following?r=1h6hhj&utm_medium=ios&utm_campaign=post
 
-Trading the mean reversion curve
-
-- https://www.quantitativo.com/p/trading-the-mean-reversion-curve
 
 Momentum Strategy from "Stocks on the Move" in Python
-
 - https://teddykoker.com/2019/05/momentum-strategy-from-stocks-on-the-move-in-python/
 
 #### StatArb
@@ -88,7 +78,9 @@ Momentum Strategy from "Stocks on the Move" in Python
 
     Financial noob:
     - https://github.com/financialnoob/pairs_trading?tab=readme-ov-file
-    
+2. Mean Reversion
+   Trading the mean reversion curve
+    - https://www.quantitativo.com/p/trading-the-mean-reversion-curve    
 
 #### AI for Trading
 
