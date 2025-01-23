@@ -18,6 +18,12 @@
 https://bookdown.org/rushad_16/TSA_Lectures_book/
 ---
 
+## Machine learing
+
+https://machinelearningmastery.com/products/
+
+---
+
 ## Introduction & Collections
 
 Liu Peng
