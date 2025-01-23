@@ -1,0 +1,3 @@
+[console_scripts]
+lean = lean.main:main
+

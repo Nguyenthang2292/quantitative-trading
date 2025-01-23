@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: yf
+Version: 0.0.4
+Summary: Diagnosing dictionaries
+Home-page: https://github.com/thorwhalen/uu/tree/master/yf
+Author: Thor Whalen
+License: apache-2.0
+Platform: any
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+
+# yf
+Diagnosing dictionaries
+
+
+To install:	```pip install yf```
+
+
