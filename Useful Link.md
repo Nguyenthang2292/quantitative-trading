@@ -11,11 +11,15 @@
 ![alt text](UsefulLink_img/image.png)
 
 ![alt text](UsefulLink_img/image-4.png)
+
 ---
+
 - https://en.m.wikipedia.org/wiki/Time_series
 
 - https://200lab.io/blog/kham-pha-time-series-analysis-phan-1?srsltid=AfmBOoolI_obkS3X0VzUaTue5Z_qWWrOdUw2O7xU0VdQO4doXk9uWdv4
-https://bookdown.org/rushad_16/TSA_Lectures_book/
+
+- https://bookdown.org/rushad_16/TSA_Lectures_book/
+
 ---
 
 ## Machine learing
@@ -28,6 +32,9 @@ https://machinelearningmastery.com/products/
 
 Liu Peng
 - https://youtube.com/playlist?list=PLA2Lu2TlMqzVPeD043744URgdejZf1vlr&si=3tjhwIeTegsR1u4O
+
+Quantopian Public Lectures
+https://github.com/quantopian/research_public
 
 (Quantopian) quantrocket-codeload/quant-finance-lectures 
 - https://github.com/quantrocket-codeload/quant-finance-lectures/blob/master/quant_finance_lectures/Lecture42-Introduction-to-Pairs-Trading.ipynb
