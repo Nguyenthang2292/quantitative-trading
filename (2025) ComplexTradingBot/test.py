@@ -1,12 +1,14 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from dataclasses import dataclass
 from enum import Enum
-import plotly.graph_objects as go
 
-# Định nghĩa các ENUM và cấu trúc dữ liệu
+# ---------------------------------------------
+# 1) Định nghĩa các HẰNG SỐ, ENUM
+# ---------------------------------------------
+
 class Leg(Enum):
     BEARISH_LEG = 0
     BULLISH_LEG = 1
@@ -17,7 +19,10 @@ class Bias(Enum):
 
 COLOR_BULLISH = "green"
 COLOR_BEARISH = "red"
-equalHighsLowsThresholdInput = 0.1
+
+# ---------------------------------------------
+# 2) Cấu trúc dữ liệu
+# ---------------------------------------------
 
 @dataclass
 class Alerts:
@@ -38,39 +43,32 @@ class Pivot:
 class Trend:
     bias: Bias = Bias.BULLISH
 
-# Hàm tính ATR
-def calculate_atr(df, period=14, method="sma"):
-    high_low = df["High"] - df["Low"]
-    high_close = np.abs(df["High"] - df["Close"].shift())
-    low_close = np.abs(df["Low"] - df["Close"].shift())
-    ranges = pd.concat([high_low, high_close, low_close], axis=1)
-    true_range = ranges.max(axis=1)
-    if method == "sma":
-        atr = true_range.rolling(period).mean()
-    elif method == "ema":
-        atr = true_range.ewm(span=period, adjust=False).mean()
-    else:
-        raise ValueError("method must be 'sma' or 'ema'")
-    return atr
+# ---------------------------------------------
+# 3) Hàm tiện ích
+# ---------------------------------------------
 
-# Hàm xác định leg
 def identify_leg(highs, lows, idx, lookback=5):
     if idx - lookback < 0 or idx >= len(highs):
-        print(f"❌ Lỗi: idx ({idx}) vượt quá phạm vi của highs (size={len(highs)})")
         return None
+    
     segment_highs = highs.iloc[idx-lookback : idx+1]
-    segment_lows = lows.iloc[idx-lookback : idx+1]
-    local_max = segment_highs.max() if not segment_highs.empty else np.nan
-    local_min = segment_lows.min() if not segment_lows.empty else np.nan
-    is_bearish_leg = (highs.iloc[idx] >= local_max) and (highs.iloc[idx-lookback:idx].max() < local_max)
-    is_bullish_leg = (lows.iloc[idx] <= local_min) and (lows.iloc[idx-lookback:idx].min() > local_min)
+    segment_lows  = lows.iloc[idx-lookback : idx+1]
+    
+    if segment_highs.empty or segment_lows.empty:
+        return None
+
+    local_max = segment_highs.max()
+    local_min = segment_lows.min()
+    
+    is_bearish_leg = (highs.iloc[idx] >= local_max) and (highs.iloc[idx-1] < local_max)
+    is_bullish_leg = (lows.iloc[idx] <= local_min) and (lows.iloc[idx-1] > local_min)
+    
     if is_bearish_leg:
         return Leg.BEARISH_LEG
     elif is_bullish_leg:
         return Leg.BULLISH_LEG
     return None
 
-# Hàm phát hiện cấu trúc swing
 def detect_swing_structure(data, lookback=5):
     swingHigh = Pivot()
     swingLow  = Pivot()
@@ -78,10 +76,7 @@ def detect_swing_structure(data, lookback=5):
     bos_choch_marks = []
     bos_lines = []
     choch_lines = []
-    equal_highs = []
-    equal_lows = []
     currentAlerts = Alerts()
-    atrMeasure = calculate_atr(data)
 
     highs = data["High"]
     lows  = data["Low"]
@@ -90,6 +85,7 @@ def detect_swing_structure(data, lookback=5):
 
     for i in range(len(data)):
         curr_leg = identify_leg(highs, lows, i, lookback=lookback)
+        
         if curr_leg is not None and prev_leg != curr_leg:
             if curr_leg == Leg.BULLISH_LEG:
                 swingLow.lastLevel = swingLow.currentLevel
@@ -133,31 +129,27 @@ def detect_swing_structure(data, lookback=5):
                 swingLow.crossed = True
                 bos_choch_marks.append((i, swingLow.currentLevel, mark_text, COLOR_BEARISH))
 
-        if np.abs(swingLow.currentLevel - lows[i]) < equalHighsLowsThresholdInput * atrMeasure[i]:
-            equal_lows.append((i, swingLow.currentLevel))
-        
-        if np.abs(swingHigh.currentLevel - highs[i]) < equalHighsLowsThresholdInput * atrMeasure[i]:
-            equal_highs.append((i, swingHigh.currentLevel))
+    return bos_choch_marks, bos_lines, choch_lines, currentAlerts
 
-    return bos_choch_marks, bos_lines, choch_lines, equal_highs, equal_lows, currentAlerts
+# ---------------------------------------------
+# 4) Hàm main
+# ---------------------------------------------
 
-# Hàm main
 def main():
-    df = yf.download("AAPL", start="2024-01-01", end="2025-02-03", interval="1d")
+    df = yf.download("AAPL", start="2014-01-01", end=None, interval="1d")
     if df.empty:
-        print("⚠️ Lỗi: Không tải được dữ liệu AAPL từ yfinance. Vui lòng kiểm tra kết nối mạng hoặc mã cổ phiếu.")
+        print("Không tải được dữ liệu AAPL từ yfinance.")
         return
-    
-    df_filtered = pd.DataFrame({
-        "Date": df.index,
-        "Open": df["Open"].squeeze(),
-        "High": df["High"].squeeze(),
-        "Low": df["Low"].squeeze(),
-        "Close": df["Close"].squeeze()
-    })
-    df_filtered.set_index("Date", inplace=True)
 
-    bos_choch_marks, bos_lines, choch_lines, equal_highs, equal_lows, alerts = detect_swing_structure(df_filtered, lookback=5)
+    df_filtered = pd.DataFrame({
+    "Date": df.index,  # Lấy index làm cột Date
+    "Open": df["Open"].squeeze(),
+    "High": df["High"].squeeze(),
+    "Low": df["Low"].squeeze(),
+    "Close": df["Close"].squeeze()
+    })
+
+    bos_choch_marks, bos_lines, choch_lines, alerts = detect_swing_structure(df_filtered, lookback=5)
 
     fig = go.Figure()
     fig.add_trace(go.Candlestick(
@@ -168,6 +160,15 @@ def main():
         close=df_filtered["Close"],
         name="AAPL Candlestick"
     ))
+    
+    fig.update_layout(
+        title="AAPL Candlestick Chart (Simulated Data)",
+        xaxis_title="Date",
+        yaxis_title="Price (USD)",
+        xaxis_rangeslider_visible=True,
+        template="plotly_white",
+        dragmode="pan"
+    )
 
     for (i, price, text, color) in bos_choch_marks:
         if i < len(df_filtered):
@@ -179,51 +180,25 @@ def main():
                 text=[text],
                 textposition="top center"
             ))
-
+    
     for start, end, level in bos_lines:
         fig.add_trace(go.Scatter(
             x=[df_filtered.index[start], df_filtered.index[end]],
             y=[level, level],
             mode="lines",
             line=dict(color="green", width=2, dash="dash"),
-            name=f"BOS {start}-{end}"
+            name="BOS"
         ))
-
+    
     for start, end, level in choch_lines:
         fig.add_trace(go.Scatter(
             x=[df_filtered.index[start], df_filtered.index[end]],
             y=[level, level],
             mode="lines",
             line=dict(color="red", width=2, dash="dot"),
-            name=f"CHoCH {start}-{end}"
+            name="CHoCH"
         ))
 
-    for (i, price) in equal_highs:
-        fig.add_trace(go.Scatter(
-            x=[df_filtered.index[i]],
-            y=[price],
-            mode="markers",
-            marker=dict(color="blue", size=8, symbol="triangle-up"),
-            name="Equal High"
-        ))
-
-    for (i, price) in equal_lows:
-        fig.add_trace(go.Scatter(
-            x=[df_filtered.index[i]],
-            y=[price],
-            mode="markers",
-            marker=dict(color="purple", size=8, symbol="triangle-down"),
-            name="Equal Low"
-        ))
-
-    fig.update_layout(
-        title="AAPL Candlestick Chart",
-        xaxis_title="Date",
-        yaxis_title="Price (USD)",
-        xaxis_rangeslider_visible=True,
-        template="plotly_white",
-        dragmode="pan"
-    )
     fig.show()
     print("Alerts cuối cùng:", alerts)
 
