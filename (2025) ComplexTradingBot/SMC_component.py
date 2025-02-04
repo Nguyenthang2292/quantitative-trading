@@ -1,14 +1,13 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from dataclasses import dataclass
-from enum import Enum
 import plotly.graph_objects as go
 from dataclasses import dataclass
 from typing import List, Optional
+import bisect
 
-# Danh sách lưu trữ các đối tượng vẽ trên biểu đồ
+# Khởi tạo biểu đồ
 fig = go.Figure()
 
 BULLISH_LEG = 1
@@ -38,9 +37,9 @@ TINY = "tiny"
 SMALL = "small"
 NORMAL = "normal"
 
-# TINY                            = size.tiny
-# SMALL                           = size.small
-# NORMAL                          = size.normal
+# TINY = size.tiny
+# SMALL = size.small
+# NORMAL = size.normal
 
 ATR = "Atr"
 RANGE = "Cumulative Mean Range"
@@ -139,7 +138,6 @@ premium_discount_zones = {
     "equilibrium_zone_color": GRAY,
     "discount_zone_color": GREEN
 }
-
 
 # 📌 Định nghĩa cấu trúc cảnh báo (Alerts)
 @dataclass
@@ -303,8 +301,6 @@ bearishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == "CLO
 # Xác định nguồn sử dụng trong Bullish Order Blocks Mitigation
 bullishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == "CLOSE" else "Low"
 
-import numpy as np
-
 def compute_atr(highs, lows, closes, period=200):
     # Kiểm tra đầu vào
     if len(highs) != len(lows) or len(highs) != len(closes):
@@ -331,7 +327,6 @@ def compute_atr(highs, lows, closes, period=200):
     # Tính ATR (SMA của các giá trị TR)
     atr = np.mean(tr[-period:])
     return atr if not np.isnan(atr) else None
-
 
 # 📌 Xác định thanh có độ biến động cao
 def is_high_volatility_bar(high, low, volatilityMeasure):
@@ -383,22 +378,14 @@ def start_of_bullish_leg(leg_values):
     return (leg_values[-2] == BEARISH_LEG) and (leg_values[-1] == BULLISH_LEG)
 
 def draw_label(label_time, 
-            label_price, tag, label_color, 
-            label_style, mode=PRESENT, 
-            text_size=12, x_offset=0, y_offset=0):
-    """
-    Vẽ một nhãn trên biểu đồ bằng Plotly.
-
-    :param label_time: (int) Thời gian trên trục X.
-    :param label_price: (float) Giá trên trục Y.
-    :param tag: (str) Nội dung nhãn.
-    :param label_color: (str) Màu sắc nhãn.
-    :param label_style: (str) Kiểu nhãn ("label_up" hoặc "label_down").
-    :param mode: (str) Chế độ hiển thị ("Historical" hoặc "Present").
-    :param text_size: (int) Kích thước chữ (default: 12).
-    :param x_offset: (int) Độ lệch X của nhãn.
-    :param y_offset: (int) Độ lệch Y của nhãn.
-    """
+            label_price, 
+            tag, 
+            label_color, 
+            label_style, 
+            mode=PRESENT, 
+            text_size=12, 
+            x_offset=0, 
+            y_offset=0):
 
     # Nếu ở chế độ "Present", xóa nhãn cũ trước khi vẽ
     if mode == PRESENT:
@@ -413,20 +400,14 @@ def draw_label(label_time,
         textfont=dict(color=label_color, size=text_size)
     ))
 
-def draw_equal_high_low(pivot, level, size, equal_high, 
-                        mode=PRESENT, line_width=1, line_dash="dot", text_size=12):
-    """
-    Vẽ Equal High (EQH) hoặc Equal Low (EQL) bằng Plotly.
-
-    :param pivot: (Pivot) Điểm pivot để vẽ đường.
-    :param level: (float) Giá trị của EQH/EQL.
-    :param size: (int) Độ dài khoảng cách từ pivot.
-    :param equal_high: (bool) True nếu là EQH, False nếu là EQL.
-    :param mode: (str) Chế độ hiển thị ("Historical" hoặc "Present").
-    :param line_width: (int) Độ dày của đường (default: 1).
-    :param line_dash: (str) Kiểu đường ("dot", "dash", "solid").
-    :param text_size: (int) Kích thước chữ của nhãn (default: 12).
-    """
+def draw_equal_high_low(pivot, 
+                        level, 
+                        size, 
+                        equal_high, 
+                        mode=PRESENT, 
+                        line_width=1, 
+                        line_dash="dot", 
+                        text_size=12):
 
     tag = "EQH" if equal_high else "EQL"
     color = "#F23645" if equal_high else "#089981"  # Màu swingBearishColor hoặc swingBullishColor
@@ -446,17 +427,18 @@ def draw_equal_high_low(pivot, level, size, equal_high,
     ))
 
     # Vẽ nhãn EQH/EQL
-    draw_label(times[size], level, tag, color, label_style, text_size=text_size)
+    draw_label(times[size], 
+            level, 
+            tag, 
+            color, 
+            label_style, 
+            text_size=text_size)
 
 # 📌 Hàm xác định cấu trúc hiện tại và điểm xoay (swing points)
-def get_current_structure(size, atrMeasure, equal_high_low=False, internal=False):
-    """
-    Lưu trữ cấu trúc hiện tại và trailing swing points.
-    
-    :param size: (int) Kích thước cấu trúc
-    :param equal_high_low: (bool) Hiển thị Equal Highs/Lows
-    :param internal: (bool) Xác định cấu trúc nội bộ
-    """
+def get_current_structure(size, 
+                        atrMeasure, 
+                        equal_high_low=False, 
+                        internal=False):
     
     current_leg = leg(size)  # Xác định trạng thái leg
     new_pivot = start_of_new_leg([current_leg])  # Kiểm tra điểm xoay mới
@@ -526,21 +508,13 @@ def get_current_structure(size, atrMeasure, equal_high_low=False, internal=False
                     "label_down"
                 )
                 
-def draw_structure(pivot, tag, structure_color, line_style, 
-                label_style, label_size, mode=PRESENT):
-    """
-    Vẽ đường và nhãn đại diện cho một cấu trúc bằng Plotly.
-
-    :param pivot: (Pivot) Điểm pivot cơ sở.
-    :param tag: (str) Văn bản hiển thị trên nhãn.
-    :param structure_color: (str) Màu sắc của cấu trúc.
-    :param line_style: (str) Kiểu đường (solid, dash, dot).
-    :param label_style: (str) Kiểu nhãn ("label_up" hoặc "label_down").
-    :param label_size: (int) Cỡ chữ hiển thị trên nhãn.
-    :param mode: (str) Chế độ hiển thị ("Historical" hoặc "Present").
-    :return: None (Thêm trực tiếp vào `fig`)
-    """
-
+def draw_structure(pivot, 
+                tag, 
+                structure_color, 
+                line_style, 
+                label_style, 
+                label_size,
+                mode=PRESENT):
     # Nếu ở chế độ "Present", xóa dữ liệu cũ trước khi vẽ mới
     if mode == PRESENT:
         fig.data = []  # Xóa tất cả dữ liệu cũ
@@ -570,11 +544,6 @@ def draw_structure(pivot, tag, structure_color, line_style,
 
 # 📌 Hàm xóa Order Blocks
 def delete_order_blocks(internal=False):
-    """
-    Xóa các order blocks nếu bị cắt ngang.
-
-    :param internal: (bool) True nếu là Internal Order Blocks
-    """
     order_blocks = internalOrderBlocks if internal else swingOrderBlocks
 
     for index in range(len(order_blocks) - 1, -1, -1):  # Lặp ngược để tránh lỗi khi xóa phần tử
@@ -591,13 +560,6 @@ def delete_order_blocks(internal=False):
 
 # 📌 Hàm lưu Order Blocks
 def store_order_block(pivot, currentBarIndex, internal=False, bias=BULLISH):
-    """
-    Lưu trữ Order Blocks mới.
-
-    :param pivot: (Pivot) Điểm pivot cơ sở
-    :param internal: (bool) True nếu là Internal Order Blocks
-    :param bias: (int) BULLISH (+1) hoặc BEARISH (-1)
-    """
     if (not internal and order_blocks.get("show_swing_order_blocks")) or (internal and order_blocks.get("show_internal_order_blocks")):
         order_blocks = internalOrderBlocks if internal else swingOrderBlocks
 
@@ -645,18 +607,12 @@ def store_order_block(pivot, currentBarIndex, internal=False, bias=BULLISH):
         order_blocks.insert(0, new_order_block)
 
 def draw_order_blocks(fig, internal=False):
-    """
-    Vẽ Order Blocks dưới dạng hộp (box) sử dụng Plotly.
-
-    :param fig: (plotly.graph_objects.Figure) Đối tượng biểu đồ để vẽ lên.
-    :param internal: (bool) True nếu là Internal Order Blocks.
-    """
+    
     # Chọn danh sách orderBlocks dựa vào giá trị internal
     orderBlocks = internalOrderBlocks if internal else swingOrderBlocks
 
     # Lấy kích thước của danh sách orderBlocks
     order_blocks_size = len(orderBlocks)
-
 
     if order_blocks_size > 0:
         max_order_blocks = order_blocks.get("internal_order_blocks_size", None) if internal else order_blocks.get("swing_order_blocks_size", None)
@@ -690,12 +646,7 @@ def draw_order_blocks(fig, internal=False):
 
 # 📌 Hàm phát hiện và vẽ cấu trúc thị trường bằng Plotly
 def display_structure(opens, closes, fig, internal=False):
-    """
-    Phát hiện và vẽ cấu trúc thị trường, đồng thời lưu Order Blocks bằng Plotly.
-
-    :param fig: (go.Figure) Đối tượng Figure của Plotly
-    :param internal: (bool) True nếu là cấu trúc nội bộ
-    """
+    
     bullish_bar, bearish_bar = True, True
 
     if internal_structure.get("internal_filter_confluence", None):
@@ -787,6 +738,324 @@ def display_structure(opens, closes, fig, internal=False):
             store_order_block(pivot, internal, BEARISH)
 
     return fig  # Trả về đối tượng figure đã cập nhật
+
+# --- Hàm 1: fairValueGapBox ---
+def fairValueGapBox(fig, leftTime, rightTime, topPrice, bottomPrice, boxColor, time, previous_time):
+    # Mở rộng thời gian bên phải
+    extended_right = rightTime + fair_value_gaps.value("extend_bars", None) * (time - previous_time)
+    fig.add_shape(
+        type="rect",
+        x0=leftTime,
+        x1=extended_right,
+        y0=bottomPrice,
+        y1=topPrice,
+        line=dict(color=boxColor),
+        fillcolor=boxColor
+    )
+    return fig
+
+# --- Hàm 2: deleteFairValueGaps ---
+def deleteFairValueGaps(fairValueGaps, low, high):
+    for index in range(len(fairValueGaps) - 1, -1, -1):
+        eachGap = fairValueGaps[index]
+        crossed = False
+        if low < eachGap["bottom"] and eachGap["bias"] == BULLISH:
+            crossed = True
+        elif high > eachGap["top"] and eachGap["bias"] == BEARISH:
+            crossed = True
+        if crossed:
+            # Giả lập việc xóa box: trong Plotly ta không xóa shape, chỉ loại bỏ khỏi danh sách
+            # Mẫu này chỉ xóa fair value gap khỏi danh sách
+            fairValueGaps.pop(index)
+    return fairValueGaps
+
+
+# --- Hàm 3: drawFairValueGaps ---
+def drawFairValueGaps(fairValueGaps, fig,
+                    fairValueGapsTimeframeInput, fairValueGapsThresholdInput,
+                    lastClose, lastOpen, lastTime,
+                    currentHigh, currentLow, currentTime,
+                    last2High, last2Low, bar_index,
+                    fairValueGapBullishColor, fairValueGapBearishColor):
+
+
+    barDeltaPercent = (lastClose - lastOpen) / (lastOpen * 100)
+    newTimeframe = True  # Giả sử luôn True
+    if fairValueGapsThresholdInput:
+        threshold = abs(barDeltaPercent) * 2 / bar_index
+    else:
+        threshold = 0
+
+    bullishFairValueGap = (currentLow > last2High and lastClose > last2High and barDeltaPercent > threshold and newTimeframe)
+    bearishFairValueGap = (currentHigh < last2Low and lastClose < last2Low and -barDeltaPercent > threshold and newTimeframe)
+
+    if bullishFairValueGap:
+        currentAlerts["bullishFairValueGap"] = True
+        # Vẽ box cho gap bullish
+        # Giả sử dùng lastTime làm leftTime và currentTime làm rightTime, và dùng (currentLow+last2High)/2 làm trung điểm
+        midPrice = (currentLow + last2High) / 2
+        # Vẽ top box: từ lastTime đến currentTime, box từ currentLow đến midPrice
+        fig = fairValueGapBox(fig, lastTime, currentTime, currentLow, midPrice, fairValueGapBullishColor, time=lastTime, previous_time=lastTime)
+        # Vẽ bottom box: từ lastTime đến currentTime, box từ midPrice đến last2High
+        fig = fairValueGapBox(fig, lastTime, currentTime, midPrice, last2High, fairValueGapBullishColor, time=lastTime, previous_time=lastTime)
+        new_gap = {
+            "bottom": currentLow,
+            "top": last2High,
+            "bias": BULLISH,
+            "topBox": "BoxID_top",    # placeholder
+            "bottomBox": "BoxID_bottom"  # placeholder
+        }
+        fairValueGaps.insert(0, new_gap)
+
+    if bearishFairValueGap:
+        currentAlerts["bearishFairValueGap"] = True
+        midPrice = (currentHigh + last2Low) / 2
+        fig = fairValueGapBox(fig, lastTime, currentTime, currentHigh, midPrice, fairValueGapBearishColor, time=lastTime, previous_time=lastTime)
+        fig = fairValueGapBox(fig, lastTime, currentTime, midPrice, last2Low, fairValueGapBearishColor, time=lastTime, previous_time=lastTime)
+        new_gap = {
+            "top": currentHigh,
+            "bottom": last2Low,
+            "bias": BEARISH,
+            "topBox": "BoxID_top",
+            "bottomBox": "BoxID_bottom"
+        }
+        fairValueGaps.insert(0, new_gap)
+
+    return fairValueGaps, fig
+
+# 📌 Hàm lấy kiểu đường từ chuỗi
+def get_style(style):
+    styles = {
+        "SOLID": "solid",
+        "DASHED": "dashed",
+        "DOTTED": "dotted"
+    }
+    return styles.get(style, "solid")
+
+def draw_levels(
+    fig,                        # đối tượng Figure Plotly đã khởi tạo
+    timeframe,                  # chuỗi, base timeframe
+    sameTimeframe,              # bool, True nếu chart timeframe bằng base timeframe
+    style,                      # kiểu đường: "solid", "dash", "dot",...
+    levelColor,                 # màu của đường và nhãn (ví dụ "#FF0000")
+    current_high,               # giá high hiện tại (nếu sameTimeframe)
+    current_low,                # giá low hiện tại (nếu sameTimeframe)
+    current_time,               # thời gian hiện tại (nếu sameTimeframe)
+    security_data,              # tuple: (topLevel, bottomLevel, leftTime, rightTime) từ request.security
+    times,                      # danh sách thời gian (đã sắp xếp)
+    highs,                      # danh sách giá high tương ứng
+    lows,                       # danh sách giá low tương ứng
+    last_bar_time,              # thời gian của thanh cuối (sử dụng cho vẽ)
+    time_prev,                  # thời gian của thanh trước đó (để tính delta)
+    initialTime                 # thời gian khởi tạo nếu không tìm thấy dữ liệu
+):
+    # Lấy dữ liệu từ request.security (giả lập)
+    sec_topLevel, sec_bottomLevel, sec_leftTime, sec_rightTime = security_data
+
+    # Xác định giá và thời gian dựa trên sameTimeframe
+    parsedTop = current_high if sameTimeframe else sec_topLevel
+    parsedBottom = current_low if sameTimeframe else sec_bottomLevel
+    parsedLeftTime = current_time if sameTimeframe else sec_leftTime
+    parsedRightTime = current_time if sameTimeframe else sec_rightTime
+
+    # Nếu cùng timeframe, dùng thời gian hiện tại
+    parsedTopTime = current_time
+    parsedBottomTime = current_time
+
+    # Nếu không cùng timeframe, thực hiện binary search trên danh sách times
+    if not sameTimeframe:
+        # Tìm chỉ mục phải của parsedLeftTime và parsedRightTime trong mảng times
+        leftIndex = bisect.bisect_right(times, parsedLeftTime) - 1
+        rightIndex = bisect.bisect_right(times, parsedRightTime) - 1
+        # Lấy mảng con thời gian, giá high và giá low
+        timeArray = times[leftIndex:rightIndex+1]
+        topArray = highs[leftIndex:rightIndex+1]
+        bottomArray = lows[leftIndex:rightIndex+1]
+        # Nếu có dữ liệu, xác định thời gian của điểm có giá cao nhất và thấp nhất
+        if len(timeArray) > 0:
+            max_top = max(topArray)
+            idx_max = topArray.index(max_top)
+            parsedTopTime = timeArray[idx_max]
+            min_bottom = min(bottomArray)
+            idx_min = bottomArray.index(min_bottom)
+            parsedBottomTime = timeArray[idx_min]
+        else:
+            parsedTopTime = initialTime
+            parsedBottomTime = initialTime
+
+    # Tính toán điểm kết thúc cho các đường: sử dụng last_bar_time + 20*(current_time - time_prev)
+    end_time = last_bar_time + 20 * (current_time - time_prev)
+
+    line_style = get_style(style)
+
+    # Vẽ top line
+    fig.add_shape(
+        type="line",
+        x0=parsedTopTime,
+        y0=parsedTop,
+        x1=end_time,
+        y1=parsedTop,
+        line=dict(color=levelColor, dash=line_style)
+    )
+    # Vẽ top label (sử dụng add_annotation)
+    fig.add_annotation(
+        x=end_time,
+        y=parsedTop,
+        text=f"P{timeframe}H",
+        showarrow=True,
+        arrowhead=2,
+        font=dict(color=levelColor, size=10),
+        xanchor="left"
+    )
+
+    # Vẽ bottom line
+    fig.add_shape(
+        type="line",
+        x0=parsedBottomTime,
+        y0=parsedBottom,
+        x1=end_time,
+        y1=parsedBottom,
+        line=dict(color=levelColor, dash=line_style)
+    )
+    # Vẽ bottom label
+    fig.add_annotation(
+        x=end_time,
+        y=parsedBottom,
+        text=f"P{timeframe}L",
+        showarrow=True,
+        arrowhead=2,
+        font=dict(color=levelColor, size=10),
+        xanchor="left"
+    )
+
+    return fig
+
+def in_seconds(tf):
+    try:
+        return int(tf)
+    except ValueError:
+        # Nếu tf không phải là chuỗi số, bạn có thể thêm logic chuyển đổi ở đây
+        return None
+
+def higher_timeframe(chart_timeframe, timeframe):
+    return in_seconds(chart_timeframe) > in_seconds(timeframe)
+
+
+def update_trailing_extremes(high, low, current_time, trailing):
+    trailing["top"] = max(high, trailing.get("top", high))
+    trailing["lastTopTime"] = current_time if trailing["top"] == high else trailing.get("lastTopTime", current_time)
+    trailing["bottom"] = min(low, trailing.get("bottom", low))
+    trailing["lastBottomTime"] = current_time if trailing["bottom"] == low else trailing.get("lastBottomTime", current_time)
+    return trailing
+
+# --- Hàm 1: drawHighLowSwings ---
+def draw_high_low_swings(fig, 
+                        trailing, 
+                        swingTrend, 
+                        last_bar_time, 
+                        current_time, 
+                        previous_time):
+    # Tính thời gian kết thúc cho các đường
+    rightTimeBar = last_bar_time + 20 * (current_time - previous_time)
+    
+    # Vẽ top line (trailing high)
+    fig.add_shape(
+        type="line",
+        x0=trailing["lastTopTime"],
+        y0=trailing["top"],
+        x1=rightTimeBar,
+        y1=trailing["top"],
+        line=dict(color=swingBearishColor),
+    )
+    # Vẽ top label
+    top_text = "Strong High" if swingTrend["bias"] == -1 else "Weak High"
+    fig.add_annotation(
+        x=rightTimeBar,
+        y=trailing["top"],
+        text=top_text,
+        showarrow=True,
+        arrowhead=2,
+        font=dict(color=swingBearishColor, size=10),
+        xanchor="left"
+    )
+    
+    # Vẽ bottom line (trailing low)
+    fig.add_shape(
+        type="line",
+        x0=trailing["lastBottomTime"],
+        y0=trailing["bottom"],
+        x1=rightTimeBar,
+        y1=trailing["bottom"],
+        line=dict(color=swingBullishColor),
+    )
+    # Vẽ bottom label
+    bottom_text = "Strong Low" if swingTrend["bias"] == 1 else "Weak Low"
+    fig.add_annotation(
+        x=rightTimeBar,
+        y=trailing["bottom"],
+        text=bottom_text,
+        showarrow=True,
+        arrowhead=2,
+        font=dict(color=swingBullishColor, size=10),
+        xanchor="left"
+    )
+    return fig
+
+# --- Hàm 2: drawZone ---
+def draw_zone(fig, trailing, last_bar_time, labelLevel, labelIndex, top, bottom, tag, zoneColor, style):
+    # Vẽ box zone bằng add_shape (loại hình chữ nhật)
+    # Giả sử sử dụng trailing["barTime"] làm điểm bên trái và last_bar_time làm bên phải.
+    fig.add_shape(
+        type="rect",
+        x0=trailing["barTime"],
+        x1=last_bar_time,
+        y0=bottom,
+        y1=top,
+        line=dict(color="rgba(0,0,0,0)"),
+        fillcolor=zoneColor,  # Nếu cần hiệu ứng alpha, có thể chuyển đổi sang rgba
+    )
+    # Vẽ nhãn zone bằng add_annotation
+    fig.add_annotation(
+        x=labelIndex,
+        y=labelLevel,
+        text=tag,
+        showarrow=False,
+        font=dict(color=zoneColor, size=10),
+        xanchor=("left" if style == style_label_left else "center")
+    )
+    return fig
+
+# --- Hàm 3: drawPremiumDiscountZones ---
+def draw_premium_discount_zones(fig, 
+                                trailing, 
+                                last_bar_index, 
+                                premiumZoneColor, 
+                                equilibriumZoneColorInput, 
+                                discountZoneColor):
+    # Zone Premium: sử dụng trailing.top
+    premium_label_index = round(0.5 * (trailing["barIndex"] + last_bar_index))
+    premium_top = trailing["top"]
+    premium_bottom = 0.95 * trailing["top"] + 0.05 * trailing["bottom"]
+    fig = draw_zone(fig, trailing, last_bar_time=last_bar_index, labelLevel=premium_top,
+                    labelIndex=premium_label_index, top=premium_top, bottom=premium_bottom,
+                    tag="Premium", zoneColor=premiumZoneColor, style=style_label_down)
+    
+    # Zone Equilibrium
+    equilibriumLevel = (trailing["top"] + trailing["bottom"]) / 2
+    eq_top = 0.525 * trailing["top"] + 0.475 * trailing["bottom"]
+    eq_bottom = 0.525 * trailing["bottom"] + 0.475 * trailing["top"]
+    fig = draw_zone(fig, trailing, last_bar_time=last_bar_index, labelLevel=equilibriumLevel,
+                    labelIndex=last_bar_index, top=eq_top, bottom=eq_bottom,
+                    tag="Equilibrium", zoneColor=equilibriumZoneColorInput, style=style_label_left)
+    
+    # Zone Discount: sử dụng trailing.bottom
+    discount_label_index = round(0.5 * (trailing["barIndex"] + last_bar_index))
+    discount_top = 0.95 * trailing["bottom"] + 0.05 * trailing["top"]
+    discount_bottom = trailing["bottom"]
+    fig = draw_zone(fig, trailing, last_bar_time=last_bar_index, labelLevel=trailing["bottom"],
+                    labelIndex=discount_label_index, top=discount_top, bottom=discount_bottom,
+                    tag="Discount", zoneColor=discountZoneColor, style=style_label_up)
+    return fig
 
 # Hàm main
 def main():
