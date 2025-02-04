@@ -311,6 +311,11 @@ bearishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == CLOS
 # Xác định nguồn sử dụng trong Bullish Order Blocks Mitigation
 bullishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == CLOSE else "Low"
 
+# 📌 Cảnh báo (Alerts)
+def trigger_alert(condition, title, message):
+    if condition:
+        logging.info(f"🚨 {title}: {message}")
+        
 def compute_atr(highs, lows, closes, period=200):
     # Kiểm tra đầu vào
     if len(highs) != len(lows) or len(highs) != len(closes):
@@ -588,18 +593,10 @@ def store_order_block(pivot, currentBarIndex, internal=False, bias=BULLISH):
         # Xác định chỉ mục `parsed_index`
         if bias == BEARISH:
             sliced_highs = parsedHighs[pivot.barIndex:currentBarIndex]
-            if sliced_highs:
-                parsed_index = pivot.barIndex + sliced_highs.index(max(sliced_highs))
-            else:
-                print("No data to compute Order Block")
-                return  # Không có dữ liệu để tính toán
+            parsed_index = pivot.barIndex + sliced_highs.index(max(sliced_highs)) if sliced_highs else pivot.barIndex
         else:
             sliced_lows = parsedLows[pivot.barIndex:currentBarIndex]
-            if sliced_lows:
-                parsed_index = pivot.barIndex + sliced_lows.index(min(sliced_lows))
-            else:
-                print("No data to compute Order Block")
-                return  # Không có dữ liệu để tính toán
+            parsed_index = pivot.barIndex + sliced_lows.index(min(sliced_lows)) if sliced_lows else pivot.barIndex
 
         # Kiểm tra xem parsed_index có hợp lệ không
         if parsed_index >= len(parsedHighs) or parsed_index >= len(parsedLows) or parsed_index >= len(times):
@@ -621,7 +618,16 @@ def store_order_block(pivot, currentBarIndex, internal=False, bias=BULLISH):
 
         # Thêm Order Block vào danh sách
         order_blocks.insert(0, new_order_block)
+        
+def is_realtime(df):
+    return pd.Timestamp(df.index[-1]).tz_localize(None) == pd.Timestamp.now().floor('T')
 
+def is_last_confirmed_history(currentBarIndex, df):
+    return not is_realtime(df) and (currentBarIndex == len(df) - 1)
+
+def is_last_bar(currentBarIndex, df):
+    return currentBarIndex == len(df) - 1
+    
 def draw_order_blocks(fig, internal=False):
     # Chọn danh sách orderBlocks dựa vào giá trị internal
     orderBlocks = internalOrderBlocks if internal else swingOrderBlocks
@@ -1117,6 +1123,19 @@ def draw_premium_discount_zones(fig,
                     style="up")
     return fig
 
+def is_monthly_timeframe(df):
+    print("📆 Đây là đầu tháng!")
+    return df.index[-1].day == 1
+
+def is_weekly_timeframe(df):
+    print("📅 Đây là đầu tuần!")
+    return df.index[-1].weekday() == 0
+
+def is_daily_timeframe():
+    print("📊 Đây là dữ liệu hàng ngày!")
+    return True
+
+
 # Hàm main
 def main():
     # Thiết lập logging cho cảnh báo
@@ -1152,8 +1171,6 @@ def main():
     last_close = df_filtered["Close"].iloc[-2]
     
     bar_index = len(df_filtered) - 1
-    
-    fairValueGapsTimeframeInput = 1440
     
     # 📌 Cập nhật biến và thực thi
     parsedOpen = open if config.get("show_trend", False) else None
@@ -1191,11 +1208,11 @@ def main():
 
         if premium_discount_zones.get("show", False):
             fig = draw_premium_discount_zones(fig,
-                                                trailing,
-                                                current_time,
-                                                premiumZoneColor,
-                                                premium_discount_zones.get("equilibrium_zone_color", GRAY),
-                                                discountZoneColor)
+                                            trailing,
+                                            current_time,
+                                            premiumZoneColor,
+                                            premium_discount_zones.get("equilibrium_zone_color", GRAY),
+                                            discountZoneColor)
     
     # 📌 Xóa Fair Value Gaps nếu bật
     if fair_value_gaps.get("show", False):
@@ -1263,11 +1280,12 @@ def main():
         )
     else:
         volatilityMeasure = 0
-
+    
+    volatilityMeasure = volatilityMeasure[-1] if isinstance(volatilityMeasure, np.ndarray) else volatilityMeasure
     print("volatilityMeasure:" + str(volatilityMeasure))
     
     # 📌 Lấy giá cao/thấp đã xử lý
-    highVolatilityBar = is_high_volatility_bar(high, low, volatilityMeasure[-1] if isinstance(volatilityMeasure, np.ndarray) else volatilityMeasure)
+    highVolatilityBar = is_high_volatility_bar(high, low, volatilityMeasure)
     print("highVolatilityBar:" + str(highVolatilityBar))
     
     parsedHigh = low if highVolatilityBar else high
@@ -1299,8 +1317,8 @@ def main():
     if fair_value_gaps.get("show", False):
         draw_fair_value_gaps(fairValueGaps,
                             fig,
-                            fairValueGapsTimeframeInput,
-                            fairValueGapsThresholdInput,
+                            "D",
+                            1.0,
                             last_close,
                             last_open,
                             last_bar_time,
@@ -1312,6 +1330,58 @@ def main():
                             bar_index,
                             fairValueGapBullishColor,
                             fairValueGapBearishColor)
+
+    # 📌 Xử lý các Order Blocks cuối cùng khi hết dữ liệu lịch sử hoặc đang cập nhật thời gian thực
+    if is_last_confirmed_history(current_time,df_filtered) or is_last_bar(current_time,df_filtered):
+        if showInternalOrderBlocksInput:
+            draw_order_blocks(True)
+
+    if showSwingOrderBlocksInput:
+        draw_order_blocks()
+    
+    # 📌 Cập nhật thanh cuối cùng
+    lastBarIndex = last_bar_time
+    currentBarIndex = current_time
+    newBar = currentBarIndex != lastBarIndex 
+    
+    # 📌 Vẽ các mức Daily, Weekly, Monthly nếu cần
+    if is_last_confirmed_history(current_time,df_filtered) or (is_realtime(df_filtered) and newBar):
+        if highs_lows_mtf.get("show_daily", False) and not higher_timeframe('D'):
+                        draw_levels('D', is_daily_timeframe(), 
+                        highs_lows_mtf.get("daily_style", False), 
+                        highs_lows_mtf.get("daily_color", False))
+
+        if highs_lows_mtf.get("show_weekly", False) and not higher_timeframe('W'):
+            draw_levels('W', is_weekly_timeframe(df_filtered), 
+                        highs_lows_mtf.get("weekly_style", False), 
+                        highs_lows_mtf.get("weekly_color", False))
+
+        if highs_lows_mtf.get("show_monthly", False) and not higher_timeframe('M'):
+            draw_levels('M', is_monthly_timeframe(df_filtered), 
+                        highs_lows_mtf.get("monthly_style", False), 
+                        highs_lows_mtf.get("monthly_color", False))
+
+    # 📌 Kiểm tra các điều kiện cảnh báo
+    trigger_alert(currentAlerts.internalBullishBOS, "Internal Bullish BOS", "Internal Bullish BOS formed")
+    trigger_alert(currentAlerts.internalBullishCHoCH, "Internal Bullish CHoCH", "Internal Bullish CHoCH formed")
+    trigger_alert(currentAlerts.internalBearishBOS, "Internal Bearish BOS", "Internal Bearish BOS formed")
+    trigger_alert(currentAlerts.internalBearishCHoCH, "Internal Bearish CHoCH", "Internal Bearish CHoCH formed")
+
+    trigger_alert(currentAlerts.swingBullishBOS, "Bullish BOS", "Bullish BOS formed")
+    trigger_alert(currentAlerts.swingBullishCHoCH, "Bullish CHoCH", "Bullish CHoCH formed")
+    trigger_alert(currentAlerts.swingBearishBOS, "Bearish BOS", "Bearish BOS formed")
+    trigger_alert(currentAlerts.swingBearishCHoCH, "Bearish CHoCH", "Bearish CHoCH formed")
+
+    trigger_alert(currentAlerts.internalBullishOrderBlock, "Bullish Internal OB Breakout", "Price broke bullish internal OB")
+    trigger_alert(currentAlerts.internalBearishOrderBlock, "Bearish Internal OB Breakout", "Price broke bearish internal OB")
+    trigger_alert(currentAlerts.swingBullishOrderBlock, "Bullish Swing OB Breakout", "Price broke bullish swing OB")
+    trigger_alert(currentAlerts.swingBearishOrderBlock, "Bearish Swing OB Breakout", "Price broke bearish swing OB")
+
+    trigger_alert(currentAlerts.equalHighs, "Equal Highs", "Equal highs detected")
+    trigger_alert(currentAlerts.equalLows, "Equal Lows", "Equal lows detected")
+
+    trigger_alert(currentAlerts.bullishFairValueGap, "Bullish FVG", "Bullish FVG formed")
+    trigger_alert(currentAlerts.bearishFairValueGap, "Bearish FVG", "Bearish FVG formed")
 
     # Hiển thị biểu đồ với các Equal Highs/Lows và nhãn
     fig.show()
