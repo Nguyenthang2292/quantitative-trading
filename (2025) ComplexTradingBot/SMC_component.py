@@ -6,9 +6,7 @@ import plotly.graph_objects as go
 from dataclasses import dataclass
 from typing import List, Optional
 import bisect
-
-# Khởi tạo biểu đồ
-fig = go.Figure()
+import logging
 
 BULLISH_LEG = 1
 BEARISH_LEG = 0
@@ -47,9 +45,9 @@ RANGE = "Cumulative Mean Range"
 CLOSE = 'Close'
 HIGHLOW = 'High/Low'
 
-SOLID = '⎯⎯⎯'
-DASHED = '----'
-DOTTED = '····'
+SOLID = 'solid'
+DASHED = 'dashed'
+DOTTED = 'dotted'
 
 # //---------------------------------------------------------------------------------------------------------------------}
 # //DATA STRUCTURES & VARIABLES
@@ -90,7 +88,7 @@ swing_structure = {
 order_blocks = {
     "show_internal_order_blocks": True,
     "internal_order_blocks_size": 5,
-    "show_swing_order_blocks": False,
+    "show_swing_order_blocks": True,
     "swing_order_blocks_size": 5,
     "order_block_filter": ATR,
     "order_block_mitigation": HIGHLOW,
@@ -102,7 +100,7 @@ order_blocks = {
 
 # 📌 Cấu hình Equal Highs/Lows
 equal_highs_lows = {
-    "show": True,
+    "show": False,
     "length": 3,
     "threshold": 0.1,
     "label_size": TINY
@@ -266,7 +264,7 @@ COLOR_SCHEME = {
 }
 
 # Xác định chế độ hiển thị màu sắc
-styleInput = MONOCHROME  # Hoặc COLORED
+styleInput = COLOR_SCHEME  # Hoặc COLORED
 
 # Gán giá trị màu sắc dựa trên chế độ hiển thị
 swingBullishColor = COLOR_SCHEME["swingBullishColor"]["monochrome"] if styleInput == MONOCHROME else COLOR_SCHEME["swingBullishColor"]["colored"]
@@ -278,28 +276,40 @@ discountZoneColor = COLOR_SCHEME["discountZoneColor"]["monochrome"] if styleInpu
 
 currentAlerts = Alerts()
 
-def initialize_order_blocks(showSwingOrderBlocks, showInternalOrderBlocks, swingOrderBlocksSize, internalOrderBlocksSize):
+def box_new(x0, x1, y0, y1, xloc, extend):
+    return {
+        "x0": x0,
+        "x1": x1,
+        "y0": y0,
+        "y1": y1,
+        "xloc": xloc,
+        "extend": extend
+    }
+
+def initialize_order_blocks(showSwingOrderBlocks, 
+                            showInternalOrderBlocks, 
+                            swingOrderBlocksSize, 
+                            internalOrderBlocksSize,
+                            swing_box_params, 
+                            internal_box_params):
     if showSwingOrderBlocks:
         for _ in range(swingOrderBlocksSize):
-            swingOrderBlocksBoxes.append(None)  # Giả lập hộp giá trị
+            swingOrderBlocksBoxes.append(box_new(*swing_box_params))
+            print("Swing Order Blocks Boxes Append Success:", swingOrderBlocksBoxes)
+            
     if showInternalOrderBlocks:
         for _ in range(internalOrderBlocksSize):
-            internalOrderBlocksBoxes.append(None)
-
-# # Xác định nguồn sử dụng trong Bearish Order Blocks Mitigation
-# bearishOrderBlockMitigationSource = CLOSE if orderBlockMitigationInput == CLOSE else HIGH
-
-# # Xác định nguồn sử dụng trong Bullish Order Blocks Mitigation
-# bullishOrderBlockMitigationSource = CLOSE if orderBlockMitigationInput == CLOSE else LOW
-
+            internalOrderBlocksBoxes.append(box_new(*internal_box_params))
+            print("Internal Order Blocks Boxes Append Success:", internalOrderBlocksBoxes)
+            
 # Trích xuất giá trị order_block_mitigation từ dictionary
-orderBlockMitigationInput = order_blocks.get("order_block_mitigation", "CLOSE")  # Mặc định là "CLOSE" nếu không tìm thấy
+orderBlockMitigationInput = order_blocks.get("order_block_mitigation", CLOSE)
 
 # Xác định nguồn sử dụng trong Bearish Order Blocks Mitigation
-bearishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == "CLOSE" else "High"
+bearishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == CLOSE else "High"
 
 # Xác định nguồn sử dụng trong Bullish Order Blocks Mitigation
-bullishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == "CLOSE" else "Low"
+bullishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == CLOSE else "Low"
 
 def compute_atr(highs, lows, closes, period=200):
     # Kiểm tra đầu vào
@@ -377,15 +387,16 @@ def start_of_bullish_leg(leg_values):
     
     return (leg_values[-2] == BEARISH_LEG) and (leg_values[-1] == BULLISH_LEG)
 
-def draw_label(label_time, 
-            label_price, 
-            tag, 
-            label_color, 
-            label_style, 
-            mode=PRESENT, 
-            text_size=12, 
-            x_offset=0, 
-            y_offset=0):
+def draw_label(fig,
+                label_time, 
+                label_price, 
+                tag, 
+                label_color, 
+                label_style, 
+                mode=PRESENT, 
+                text_size=12, 
+                x_offset=0, 
+                y_offset=0):
 
     # Nếu ở chế độ "Present", xóa nhãn cũ trước khi vẽ
     if mode == PRESENT:
@@ -399,8 +410,11 @@ def draw_label(label_time,
         textposition="top center" if label_style == "label_up" else "bottom center",
         textfont=dict(color=label_color, size=text_size)
     ))
+    
+    return fig
 
-def draw_equal_high_low(pivot, 
+def draw_equal_high_low(fig,
+                        pivot, 
                         level, 
                         size, 
                         equal_high, 
@@ -413,6 +427,7 @@ def draw_equal_high_low(pivot,
     color = "#F23645" if equal_high else "#089981"  # Màu swingBearishColor hoặc swingBullishColor
     label_style = "label_down" if equal_high else "label_up"
 
+    # CẦN CHÚ Ý CHỖ NÀY
     # Nếu ở chế độ "Present", xóa line & label cũ
     if mode == PRESENT:
         fig.data = []  # Xóa tất cả dữ liệu cũ
@@ -427,12 +442,14 @@ def draw_equal_high_low(pivot,
     ))
 
     # Vẽ nhãn EQH/EQL
-    draw_label(times[size], 
+    fig = draw_label(times[size], 
             level, 
             tag, 
             color, 
             label_style, 
             text_size=text_size)
+    
+    return fig
 
 # 📌 Hàm xác định cấu trúc hiện tại và điểm xoay (swing points)
 def get_current_structure(size, 
@@ -468,7 +485,7 @@ def get_current_structure(size,
                 trailing.lastBottomTime = p_ivot.barTime
 
             # Hiển thị swing points nếu được bật
-            if swing_structure.get("show_swings", None) and not internal and not equal_high_low:
+            if swing_structure.get("show_swings", False) and not internal and not equal_high_low:
                 draw_label(
                     times[size],
                     p_ivot.currentLevel,
@@ -499,22 +516,21 @@ def get_current_structure(size,
                 trailing.lastTopTime = p_ivot.barTime
 
             # Hiển thị swing points nếu được bật
-            if swing_structure.get("show_swings", None) and not internal and not equal_high_low:
-                draw_label(
-                    times[size],
-                    p_ivot.currentLevel,
-                    "HH" if p_ivot.currentLevel > p_ivot.lastLevel else "LH",
-                    swingBearishColor,
-                    "label_down"
-                )
+            if swing_structure.get("show_swings", False) and not internal and not equal_high_low:
+                draw_label(times[size],
+                        p_ivot.currentLevel,
+                        "HH" if p_ivot.currentLevel > p_ivot.lastLevel else "LH",
+                        swingBearishColor,
+                        "label_down")
                 
-def draw_structure(pivot, 
-                tag, 
-                structure_color, 
-                line_style, 
-                label_style, 
-                label_size,
-                mode=PRESENT):
+def draw_structure(fig,
+                    pivot, 
+                    tag, 
+                    structure_color, 
+                    line_style, 
+                    label_style, 
+                    label_size,
+                    mode=PRESENT):
     # Nếu ở chế độ "Present", xóa dữ liệu cũ trước khi vẽ mới
     if mode == PRESENT:
         fig.data = []  # Xóa tất cả dữ liệu cũ
@@ -534,13 +550,14 @@ def draw_structure(pivot,
 
     # Vẽ nhãn
     fig.add_trace(go.Scatter(
-        x=[label_position_x],
-        y=[label_position_y],
-        mode="text",
-        text=tag,
-        textposition="top center" if label_style == "label_up" else "bottom center",
-        textfont=dict(color=structure_color, size=label_size)
-    ))
+                x=[label_position_x],
+                y=[label_position_y],
+                mode="text",
+                text=tag,
+                textposition="top center" if label_style == "label_up" else "bottom center",
+                textfont=dict(color=structure_color, size=label_size)))
+    
+    return fig
 
 # 📌 Hàm xóa Order Blocks
 def delete_order_blocks(internal=False):
@@ -560,7 +577,7 @@ def delete_order_blocks(internal=False):
 
 # 📌 Hàm lưu Order Blocks
 def store_order_block(pivot, currentBarIndex, internal=False, bias=BULLISH):
-    if (not internal and order_blocks.get("show_swing_order_blocks")) or (internal and order_blocks.get("show_internal_order_blocks")):
+    if (not internal and order_blocks.get("show_swing_order_blocks", True)) or (internal and order_blocks.get("show_internal_order_blocks", True)):
         order_blocks = internalOrderBlocks if internal else swingOrderBlocks
 
         # Kiểm tra xem pivot.barIndex có hợp lệ không
@@ -594,8 +611,7 @@ def store_order_block(pivot, currentBarIndex, internal=False, bias=BULLISH):
             parsedHighs[parsed_index],
             parsedLows[parsed_index],
             times[parsed_index],
-            bias
-        )
+            bias)
 
         print("New Order Block Created:", new_order_block)
 
@@ -607,40 +623,44 @@ def store_order_block(pivot, currentBarIndex, internal=False, bias=BULLISH):
         order_blocks.insert(0, new_order_block)
 
 def draw_order_blocks(fig, internal=False):
-    
     # Chọn danh sách orderBlocks dựa vào giá trị internal
     orderBlocks = internalOrderBlocks if internal else swingOrderBlocks
 
     # Lấy kích thước của danh sách orderBlocks
     order_blocks_size = len(orderBlocks)
+    print("Order Blocks Size:", order_blocks_size)
 
     if order_blocks_size > 0:
-        max_order_blocks = order_blocks.get("internal_order_blocks_size", None) if internal else order_blocks.get("swing_order_blocks_size", None)
+        max_order_blocks = order_blocks.get("internal_order_blocks_size", 5) if internal else order_blocks.get("swing_order_blocks_size", 5)
         parsed_order_blocks = order_blocks[:min(max_order_blocks, order_blocks_size)]
         
         for each_order_block in parsed_order_blocks:
             order_block_color = (
                 MONO_BEARISH if each_order_block.bias == BEARISH else MONO_BULLISH
                 if styleInput == MONOCHROME
-                else order_blocks.get("internal_bearish_color", None)
+                else order_blocks.get("internal_bearish_color", "#f77c80")
                 if internal and each_order_block.bias == BEARISH
-                else order_blocks.get("internal_bullish_color", None)
+                else order_blocks.get("internal_bullish_color", "#3179f5")
                 if internal
-                else order_blocks.get("swing_bearish_color", None)
+                else order_blocks.get("swing_bearish_color", "#b22833")
                 if each_order_block.bias == BEARISH
-                else order_blocks.get("swing_bullish_color", None)
+                else order_blocks.get("swing_bullish_color", "#1848cc")
             )
-
-            # Vẽ hình chữ nhật (Order Block)
-            fig.add_trace(go.Scatter(
-                x=[each_order_block.barTime, each_order_block.barTime, "last_bar_time", "last_bar_time", each_order_block.barTime],
-                y=[each_order_block.barHigh, each_order_block.barLow, each_order_block.barLow, each_order_block.barHigh, each_order_block.barHigh],
+            
+            fig.add_shape(
+                type="rect",
+                x0=order_block_color["x0"],
+                x1=order_block_color["x1"],
+                y0=order_block_color["y0"],
+                y1=order_block_color["y1"],
+                xref="x",  # sử dụng trục x của biểu đồ
+                yref="y",
                 fill="toself",
                 fillcolor=order_block_color,
                 line=dict(color=None if internal else order_block_color),
                 name="Internal Order Block" if internal else "Swing Order Block",
-                opacity=0.5
-            ))
+                opacity=0.5   
+            )
 
     return fig
 
@@ -649,7 +669,7 @@ def display_structure(opens, closes, fig, internal=False):
     
     bullish_bar, bearish_bar = True, True
 
-    if internal_structure.get("internal_filter_confluence", None):
+    if internal_structure.get("internal_filter_confluence", False):
         bullish_bar = highs[-1] - max(closes[-1], opens[-1]) > min(closes[-1], opens[-1] - lows[-1])
         bearish_bar = highs[-1] - max(closes[-1], opens[-1]) < min(closes[-1], opens[-1] - lows[-1])
 
@@ -657,9 +677,9 @@ def display_structure(opens, closes, fig, internal=False):
     trend = internalTrend if internal else swingTrend
 
     line_style = "dash" if internal else "solid"
-    label_size = internal_structure.get("label_size", None) if internal else swing_structure.get("label_size", None) 
+    label_size = internal_structure.get("label_size", TINY) if internal else swing_structure.get("label_size", SMALL) 
     extra_condition = internal and internalHigh.currentLevel != swingHigh.currentLevel and bullish_bar
-    bullish_color = MONO_BULLISH if styleInput == MONOCHROME else internal_structure.get("bullish_color", None) if internal else swing_structure.get("bullish_color", None)
+    bullish_color = MONO_BULLISH if styleInput == MONOCHROME else internal_structure.get("bullish_color", GREEN) if internal else swing_structure.get("bullish_color", GREEN)
 
     # 📌 Xử lý Bullish Structure
     if closes[-1] > pivot.currentLevel and not pivot.crossed and extra_condition:
@@ -674,7 +694,7 @@ def display_structure(opens, closes, fig, internal=False):
             currentAlerts.swingBullishCHoCH = tag == CHOCH
             currentAlerts.swingBullishBOS = tag == BOS
 
-        if swing_structure.get("show_structure", None):
+        if swing_structure.get("show_structure", True):
             # 📌 Vẽ đường cấu trúc Bullish
             fig.add_trace(go.Scatter(
                 x=[pivot.barTime, times[-1]], 
@@ -694,13 +714,15 @@ def display_structure(opens, closes, fig, internal=False):
                 yshift=10
             )
 
-        if (internal and order_blocks.get("show_internal_order_blocks", None)) or (not internal and order_blocks.get("show_swing_order_blocks", None)):
+        if (internal and order_blocks.get("show_internal_order_blocks", True)) or (not internal and order_blocks.get("show_swing_order_blocks", True)):
             store_order_block(pivot, internal, BULLISH)
+            
+        return fig
 
     # 📌 Xử lý Bearish Structure
     pivot = internalLow if internal else swingLow
     extra_condition = internal and internalLow.currentLevel != swingLow.currentLevel and bearish_bar
-    bearish_color = MONO_BEARISH if styleInput == MONOCHROME else internal_structure.get("bearish_color", None) if internal else swing_structure.get("bearish_color", None)
+    bearish_color = MONO_BEARISH if styleInput == MONOCHROME else internal_structure.get("bearish_color", RED) if internal else swing_structure.get("bearish_color", RED)
 
     if closes[-1] < pivot.currentLevel and not pivot.crossed and extra_condition:
         tag = CHOCH if trend.bias == BULLISH else BOS
@@ -714,7 +736,7 @@ def display_structure(opens, closes, fig, internal=False):
             currentAlerts.swingBearishCHoCH = tag == CHOCH
             currentAlerts.swingBearishBOS = tag == BOS
 
-        if swing_structure.get("show_structure", None):
+        if swing_structure.get("show_structure", True):
             # 📌 Vẽ đường cấu trúc Bearish
             fig.add_trace(go.Scatter(
                 x=[pivot.barTime, times[-1]], 
@@ -734,10 +756,10 @@ def display_structure(opens, closes, fig, internal=False):
                 yshift=-10
             )
 
-        if (internal and order_blocks.get("show_internal_order_blocks", None)) or (not internal and order_blocks.get("show_swing_order_blocks", None)):
+        if (internal and order_blocks.get("show_internal_order_blocks", True)) or (not internal and order_blocks.get("show_swing_order_blocks", True)):
             store_order_block(pivot, internal, BEARISH)
 
-    return fig  # Trả về đối tượng figure đã cập nhật
+    return fig 
 
 # --- Hàm 1: fairValueGapBox ---
 def fairValueGapBox(fig, leftTime, rightTime, topPrice, bottomPrice, boxColor, time, previous_time):
@@ -750,12 +772,12 @@ def fairValueGapBox(fig, leftTime, rightTime, topPrice, bottomPrice, boxColor, t
         y0=bottomPrice,
         y1=topPrice,
         line=dict(color=boxColor),
-        fillcolor=boxColor
-    )
+        fillcolor=boxColor)
+    
     return fig
 
 # --- Hàm 2: deleteFairValueGaps ---
-def deleteFairValueGaps(fairValueGaps, low, high):
+def delete_fair_value_gaps(fairValueGaps, low, high):
     for index in range(len(fairValueGaps) - 1, -1, -1):
         eachGap = fairValueGaps[index]
         crossed = False
@@ -769,15 +791,23 @@ def deleteFairValueGaps(fairValueGaps, low, high):
             fairValueGaps.pop(index)
     return fairValueGaps
 
-
 # --- Hàm 3: drawFairValueGaps ---
-def drawFairValueGaps(fairValueGaps, fig,
-                    fairValueGapsTimeframeInput, fairValueGapsThresholdInput,
-                    lastClose, lastOpen, lastTime,
-                    currentHigh, currentLow, currentTime,
-                    last2High, last2Low, bar_index,
-                    fairValueGapBullishColor, fairValueGapBearishColor):
-
+def draw_fair_value_gaps(
+                    fairValueGaps, 
+                    fig,
+                    fairValueGapsTimeframeInput, 
+                    fairValueGapsThresholdInput,
+                    lastClose, 
+                    lastOpen, 
+                    lastTime,
+                    currentHigh, 
+                    currentLow, 
+                    currentTime,
+                    last2High, 
+                    last2Low, 
+                    bar_index,
+                    fairValueGapBullishColor, 
+                    fairValueGapBearishColor):
 
     barDeltaPercent = (lastClose - lastOpen) / (lastOpen * 100)
     newTimeframe = True  # Giả sử luôn True
@@ -895,8 +925,8 @@ def draw_levels(
         y0=parsedTop,
         x1=end_time,
         y1=parsedTop,
-        line=dict(color=levelColor, dash=line_style)
-    )
+        line=dict(color=levelColor, dash=line_style))
+    
     # Vẽ top label (sử dụng add_annotation)
     fig.add_annotation(
         x=end_time,
@@ -905,8 +935,7 @@ def draw_levels(
         showarrow=True,
         arrowhead=2,
         font=dict(color=levelColor, size=10),
-        xanchor="left"
-    )
+        xanchor="left")
 
     # Vẽ bottom line
     fig.add_shape(
@@ -915,8 +944,8 @@ def draw_levels(
         y0=parsedBottom,
         x1=end_time,
         y1=parsedBottom,
-        line=dict(color=levelColor, dash=line_style)
-    )
+        line=dict(color=levelColor, dash=line_style))
+    
     # Vẽ bottom label
     fig.add_annotation(
         x=end_time,
@@ -925,8 +954,7 @@ def draw_levels(
         showarrow=True,
         arrowhead=2,
         font=dict(color=levelColor, size=10),
-        xanchor="left"
-    )
+        xanchor="left")
 
     return fig
 
@@ -939,7 +967,6 @@ def in_seconds(tf):
 
 def higher_timeframe(chart_timeframe, timeframe):
     return in_seconds(chart_timeframe) > in_seconds(timeframe)
-
 
 def update_trailing_extremes(high, low, current_time, trailing):
     trailing["top"] = max(high, trailing.get("top", high))
@@ -954,7 +981,9 @@ def draw_high_low_swings(fig,
                         swingTrend, 
                         last_bar_time, 
                         current_time, 
-                        previous_time):
+                        previous_time,
+                        swingBearishColor, 
+                        swingBullishColor):
     # Tính thời gian kết thúc cho các đường
     rightTimeBar = last_bar_time + 20 * (current_time - previous_time)
     
@@ -1002,7 +1031,17 @@ def draw_high_low_swings(fig,
     return fig
 
 # --- Hàm 2: drawZone ---
-def draw_zone(fig, trailing, last_bar_time, labelLevel, labelIndex, top, bottom, tag, zoneColor, style):
+def draw_zone(fig, 
+            trailing, 
+            last_bar_time, 
+            labelLevel, 
+            labelIndex, 
+            top, 
+            bottom, 
+            tag, 
+            zoneColor, 
+            style = None):
+    
     # Vẽ box zone bằng add_shape (loại hình chữ nhật)
     # Giả sử sử dụng trailing["barTime"] làm điểm bên trái và last_bar_time làm bên phải.
     fig.add_shape(
@@ -1012,8 +1051,8 @@ def draw_zone(fig, trailing, last_bar_time, labelLevel, labelIndex, top, bottom,
         y0=bottom,
         y1=top,
         line=dict(color="rgba(0,0,0,0)"),
-        fillcolor=zoneColor,  # Nếu cần hiệu ứng alpha, có thể chuyển đổi sang rgba
-    )
+        fillcolor=zoneColor) # Nếu cần hiệu ứng alpha, có thể chuyển đổi sang rgba
+        
     # Vẽ nhãn zone bằng add_annotation
     fig.add_annotation(
         x=labelIndex,
@@ -1021,8 +1060,8 @@ def draw_zone(fig, trailing, last_bar_time, labelLevel, labelIndex, top, bottom,
         text=tag,
         showarrow=False,
         font=dict(color=zoneColor, size=10),
-        xanchor=("left" if style == style_label_left else "center")
-    )
+        xanchor=("left" if style else "center"))
+    
     return fig
 
 # --- Hàm 3: drawPremiumDiscountZones ---
@@ -1036,29 +1075,53 @@ def draw_premium_discount_zones(fig,
     premium_label_index = round(0.5 * (trailing["barIndex"] + last_bar_index))
     premium_top = trailing["top"]
     premium_bottom = 0.95 * trailing["top"] + 0.05 * trailing["bottom"]
-    fig = draw_zone(fig, trailing, last_bar_time=last_bar_index, labelLevel=premium_top,
-                    labelIndex=premium_label_index, top=premium_top, bottom=premium_bottom,
-                    tag="Premium", zoneColor=premiumZoneColor, style=style_label_down)
+    fig = draw_zone(fig, 
+                    trailing, 
+                    last_bar_time=last_bar_index, 
+                    labelLevel=premium_top,
+                    labelIndex=premium_label_index, 
+                    top=premium_top, 
+                    bottom=premium_bottom,
+                    tag="Premium", 
+                    zoneColor=premiumZoneColor, 
+                    style="down")
     
     # Zone Equilibrium
     equilibriumLevel = (trailing["top"] + trailing["bottom"]) / 2
     eq_top = 0.525 * trailing["top"] + 0.475 * trailing["bottom"]
     eq_bottom = 0.525 * trailing["bottom"] + 0.475 * trailing["top"]
-    fig = draw_zone(fig, trailing, last_bar_time=last_bar_index, labelLevel=equilibriumLevel,
-                    labelIndex=last_bar_index, top=eq_top, bottom=eq_bottom,
-                    tag="Equilibrium", zoneColor=equilibriumZoneColorInput, style=style_label_left)
+    fig = draw_zone(fig, 
+                    trailing, 
+                    last_bar_time=last_bar_index, 
+                    labelLevel=equilibriumLevel,
+                    labelIndex=last_bar_index, 
+                    top=eq_top, 
+                    bottom=eq_bottom,
+                    tag="Equilibrium", 
+                    zoneColor=equilibriumZoneColorInput, 
+                    style="left")
     
     # Zone Discount: sử dụng trailing.bottom
     discount_label_index = round(0.5 * (trailing["barIndex"] + last_bar_index))
     discount_top = 0.95 * trailing["bottom"] + 0.05 * trailing["top"]
     discount_bottom = trailing["bottom"]
-    fig = draw_zone(fig, trailing, last_bar_time=last_bar_index, labelLevel=trailing["bottom"],
-                    labelIndex=discount_label_index, top=discount_top, bottom=discount_bottom,
-                    tag="Discount", zoneColor=discountZoneColor, style=style_label_up)
+    fig = draw_zone(fig, 
+                    trailing, 
+                    last_bar_time=last_bar_index, 
+                    labelLevel=trailing["bottom"],
+                    labelIndex=discount_label_index, 
+                    top=discount_top, 
+                    bottom=discount_bottom,
+                    tag="Discount", 
+                    zoneColor=discountZoneColor, 
+                    style="up")
     return fig
 
 # Hàm main
 def main():
+    # Thiết lập logging cho cảnh báo
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    
     df = yf.download("AAPL", start="2024-01-01", end="2025-02-03", interval="1d")
     if df.empty:
         print("⚠️ Lỗi: Không tải được dữ liệu AAPL từ yfinance. Vui lòng kiểm tra kết nối mạng hoặc mã cổ phiếu.")
@@ -1072,8 +1135,87 @@ def main():
         "Close": df["Close"].squeeze()
     })
     df_filtered.set_index("Date", inplace=True)
-    print(df_filtered)
-    print("========================================")
+    current_time = df_filtered.index[-1]
+    previous_time = df_filtered.index[-2]
+    last_bar_time = df_filtered.index[-2]
+    
+    open = df_filtered["Open"].iloc[-1]
+    last_open = df_filtered["Open"].iloc[-2]
+    
+    high = df_filtered["High"].iloc[-1]
+    last2High = df_filtered["High"].iloc[-3]
+    
+    low = df_filtered["Low"].iloc[-1]
+    last2Low = df_filtered["Low"].iloc[-3]
+    
+    close= df_filtered["Close"].iloc[-1]
+    last_close = df_filtered["Close"].iloc[-2]
+    
+    bar_index = len(df_filtered) - 1
+    
+    fairValueGapsTimeframeInput = 1440
+    
+    # 📌 Cập nhật biến và thực thi
+    parsedOpen = open if config.get("show_trend", False) else None
+    candleColor = swingBullishColor if internalTrend.bias == BULLISH else swingBearishColor
+
+    # Khởi tạo biểu đồ
+    fig = go.Figure()
+    fig.add_trace(go.Candlestick(
+        x=df_filtered.index,
+        open=df_filtered["Open"],
+        high=df_filtered["High"],
+        low=df_filtered["Low"],
+        close=df_filtered["Close"],
+        name="AAPL Candlestick",
+        # Đoạn này cho màu nến phụ thuộc Bear or Bull
+        # CHÚ Ý
+        # increasing_line_color=candleColor,
+        # decreasing_line_color=candleColor,
+        customdata=[parsedOpen] * len(df_filtered)
+    ))
+    
+    # 📌 Cập nhật các điểm Swing High/Low và Premium/Discount Zones nếu bật
+    if swing_structure.get("show_high_low_swings", True) or premium_discount_zones.get("show", False):
+        fig = update_trailing_extremes(high, low, current_time, trailing)
+
+        if swing_structure.get("show_high_low_swings", True):
+            fig = draw_high_low_swings(fig,
+                                    trailing,
+                                    swingTrend,
+                                    last_bar_time,
+                                    current_time,
+                                    previous_time,
+                                    candleColor,
+                                    candleColor)
+
+        if premium_discount_zones.get("show", False):
+            fig = draw_premium_discount_zones(fig,
+                                                trailing,
+                                                current_time,
+                                                premiumZoneColor,
+                                                premium_discount_zones.get("equilibrium_zone_color", GRAY),
+                                                discountZoneColor)
+    
+    # 📌 Xóa Fair Value Gaps nếu bật
+    if fair_value_gaps.get("show", False):
+        delete_fair_value_gaps(fairValueGaps, low, high)
+    
+    # 📌 Lấy cấu trúc thị trường
+    # GỌI HÀM 2 LẦN ĐỂ HIỂN THỊ SWINGS VÀ INTETER
+    atrMeasure = compute_atr(np.array(df_filtered["High"]), 
+                            np.array(df_filtered["Low"]), 
+                            np.array(df_filtered["Close"]), 
+                            200) if len(highs) > 0 else 0
+    get_current_structure(swing_structure.get("swings_length", True), 
+                            atrMeasure, 
+                            False)
+    get_current_structure(5, atrMeasure, False, True)
+    
+    # 📌 Xác định Equal Highs/Lows nếu bật
+    
+    if equal_highs_lows.get("show", False):
+        get_current_structure(equal_highs_lows.get("length",3), atrMeasure, True)
     
     # // we create the needed boxes for displaying order blocks at the first execution
     # if barstate.isfirst
@@ -1087,25 +1229,25 @@ def main():
     showInternalOrderBlocksInput = order_blocks.get("show_internal_order_blocks", True)
     swingOrderBlocksSizeInput = order_blocks.get("swing_order_blocks_size", 5)
     internalOrderBlocksSizeInput = order_blocks.get("internal_order_blocks_size", 5)
+    swing_box_params = (None, None, None, None, "bar_time", "right")
+    internal_box_params = (None, None, None, None, "bar_time", "right")
+            
     if not df_filtered.empty:
         if "Close" in df_filtered.columns and not df_filtered["Close"].empty:
-                initialize_order_blocks(showSwingOrderBlocksInput, showInternalOrderBlocksInput, 
-                                        swingOrderBlocksSizeInput, internalOrderBlocksSizeInput)
-                draw_order_blocks(fig, internal=False)
-        else:
-            print("⚠️ Cảnh báo: df_filtered không có dữ liệu 'Close'. Không thể khởi tạo Order Blocks.")
+                print("showSwingOrderBlocksInput:", showSwingOrderBlocksInput,"\n",
+                        "showInternalOrderBlocksInput:", showInternalOrderBlocksInput,"\n",
+                        "swingOrderBlocksSizeInput:", swingOrderBlocksSizeInput,"\n",
+                        "internalOrderBlocksSizeInput:", internalOrderBlocksSizeInput)
+                
+                initialize_order_blocks(showSwingOrderBlocksInput, 
+                                        showInternalOrderBlocksInput, 
+                                        swingOrderBlocksSizeInput, 
+                                        internalOrderBlocksSizeInput,
+                                        swing_box_params,
+                                        internal_box_params)
+                print("Order Blocks Initialized")
     else:
         print("⚠️ Cảnh báo: df_filtered rỗng. Không thể khởi tạo Order Blocks.")
-
-    # Khởi tạo các biến cần thiết
-    atrMeasure = compute_atr(
-        df_filtered["High"].values,  
-        df_filtered["Low"].values,   
-        df_filtered["Close"].values, 
-        200
-    ) if not df_filtered.empty else 0
-    print("atrMeasure:" + str(atrMeasure))
-    print("========================================")
 
     orderBlockFilterInput = ATR
     
@@ -1125,24 +1267,54 @@ def main():
     print("volatilityMeasure:" + str(volatilityMeasure))
     
     # 📌 Lấy giá cao/thấp đã xử lý
-    highVolatilityBar = is_high_volatility_bar(
-        df_filtered["High"].iloc[-1], 
-        df_filtered["Low"].iloc[-1], 
-        volatilityMeasure[-1] if isinstance(volatilityMeasure, np.ndarray) else volatilityMeasure
-    )
-
-    parsedHigh = df_filtered["Low"].iloc[-1] if highVolatilityBar else df_filtered["High"].iloc[-1]
-    parsedLow = df_filtered["High"].iloc[-1] if highVolatilityBar else df_filtered["Low"].iloc[-1]
+    highVolatilityBar = is_high_volatility_bar(high, low, volatilityMeasure[-1] if isinstance(volatilityMeasure, np.ndarray) else volatilityMeasure)
+    print("highVolatilityBar:" + str(highVolatilityBar))
+    
+    parsedHigh = low if highVolatilityBar else high
+    parsedLow = high if highVolatilityBar else low
 
     # 📌 Lưu trữ dữ liệu mới vào danh sách
     parsedHighs.append(parsedHigh)
     parsedLows.append(parsedLow)
-    highs.append(df_filtered["High"].iloc[-1])
-    lows.append(df_filtered["Low"].iloc[-1])
-    times.append(df_filtered.index[-1])  
+    highs.append(high)
+    lows.append(low)
+    times.append(current_time)
+
+    # 📌 Xử lý cấu trúc thị trường nội bộ và Order Blocks
+    # GỌI HÀM 2 LẦN ĐỂ HIỂN THỊ SWINGS VÀ INTETER
+    if internal_structure.get("show_internals", True) or showInternalOrderBlocksInput or config.get("show_trend", False):
+        display_structure(df_filtered["Open"], df_filtered["Close"], fig, internal=True)
+
+    if swing_structure.get("show_structure", True) or showSwingOrderBlocksInput or swing_structure.get("show_high_low_swings", True):
+        display_structure(df_filtered["Open"], df_filtered["Close"], fig, internal=False)
+        
+    # 📌 Xóa Order Blocks nếu có
+    if showInternalOrderBlocksInput:
+        delete_order_blocks(True)
+
+    if showSwingOrderBlocksInput:
+        delete_order_blocks()
+        
+    # 📌 Vẽ lại Fair Value Gaps nếu bật
+    if fair_value_gaps.get("show", False):
+        draw_fair_value_gaps(fairValueGaps,
+                            fig,
+                            fairValueGapsTimeframeInput,
+                            fairValueGapsThresholdInput,
+                            last_close,
+                            last_open,
+                            last_bar_time,
+                            high,
+                            low,
+                            current_time,
+                            last2High,
+                            last2Low,
+                            bar_index,
+                            fairValueGapBullishColor,
+                            fairValueGapBearishColor)
 
     # Hiển thị biểu đồ với các Equal Highs/Lows và nhãn
-    # fig.show()
+    fig.show()
     
 if __name__ == "__main__":
     main()

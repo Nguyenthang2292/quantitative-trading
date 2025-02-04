@@ -11,12 +11,16 @@
         "gridspec",
         "HIGHLOW",
         "hình",
+        "hoặc",
         "iloc",
         "linestyle",
         "noob",
         "numpy",
         "profir",
         "pyplot",
-        "randn"
+        "randn",
+        "textfont",
+        "textposition",
+        "xloc"
     ]
 }
