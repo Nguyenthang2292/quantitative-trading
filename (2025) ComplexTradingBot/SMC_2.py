@@ -119,25 +119,25 @@ import math
 # 📌 Xuất settings ra để sử dụng trong bot
 print(settings)
 
-# 📌 Định nghĩa cấu trúc cảnh báo (Alerts)
-@dataclass
-class Alerts:
-    internalBullishBOS: bool = False
-    internalBearishBOS: bool = False
-    internalBullishCHoCH: bool = False
-    internalBearishCHoCH: bool = False
-    swingBullishBOS: bool = False
-    swingBearishBOS: bool = False
-    swingBullishCHoCH: bool = False
-    swingBearishCHoCH: bool = False
-    internalBullishOrderBlock: bool = False
-    internalBearishOrderBlock: bool = False
-    swingBullishOrderBlock: bool = False
-    swingBearishOrderBlock: bool = False
-    equalHighs: bool = False
-    equalLows: bool = False
-    bullishFairValueGap: bool = False
-    bearishFairValueGap: bool = False
+# # 📌 Định nghĩa cấu trúc cảnh báo (Alerts)
+# @dataclass
+# class Alerts:
+#     internalBullishBOS: bool = False
+#     internalBearishBOS: bool = False
+#     internalBullishCHoCH: bool = False
+#     internalBearishCHoCH: bool = False
+#     swingBullishBOS: bool = False
+#     swingBearishBOS: bool = False
+#     swingBullishCHoCH: bool = False
+#     swingBearishCHoCH: bool = False
+#     internalBullishOrderBlock: bool = False
+#     internalBearishOrderBlock: bool = False
+#     swingBullishOrderBlock: bool = False
+#     swingBearishOrderBlock: bool = False
+#     equalHighs: bool = False
+#     equalLows: bool = False
+#     bullishFairValueGap: bool = False
+#     bearishFairValueGap: bool = False
 
 # # 📌 Định nghĩa cấu trúc cực trị (Trailing Extremes)
 # @dataclass
@@ -243,14 +243,14 @@ currentAlerts = Alerts()
 # # 📌 Thời gian ban đầu của biểu đồ
 # initialTime = 0  # Cần cập nhật từ dữ liệu thực tế
 
-# 📌 Tạo hộp hiển thị order blocks khi lần đầu khởi chạy
-def initialize_order_blocks(showSwingOrderBlocks, showInternalOrderBlocks, swingOrderBlocksSize, internalOrderBlocksSize):
-    if showSwingOrderBlocks:
-        for _ in range(swingOrderBlocksSize):
-            swingOrderBlocksBoxes.append(None)  # Giả lập hộp giá trị
-    if showInternalOrderBlocks:
-        for _ in range(internalOrderBlocksSize):
-            internalOrderBlocksBoxes.append(None)
+# # 📌 Tạo hộp hiển thị order blocks khi lần đầu khởi chạy
+# def initialize_order_blocks(showSwingOrderBlocks, showInternalOrderBlocks, swingOrderBlocksSize, internalOrderBlocksSize):
+#     if showSwingOrderBlocks:
+#         for _ in range(swingOrderBlocksSize):
+#             swingOrderBlocksBoxes.append(None)  # Giả lập hộp giá trị
+#     if showInternalOrderBlocks:
+#         for _ in range(internalOrderBlocksSize):
+#             internalOrderBlocksBoxes.append(None)
 
 # # 📌 Thiết lập nguồn dữ liệu cho Order Block Mitigation
 # orderBlockMitigationInput = "High/Low"
@@ -573,181 +573,178 @@ def initialize_order_blocks(showSwingOrderBlocks, showInternalOrderBlocks, swing
 
 #     return {"line": line_id, "label": label_id}
 
-# 📌 Hàm xóa Order Blocks
-def delete_order_blocks(internal=False):
-    """
-    Xóa các order blocks nếu bị cắt ngang.
+# # 📌 Hàm xóa Order Blocks
+# def delete_order_blocks(internal=False):
+#     """
+#     Xóa các order blocks nếu bị cắt ngang.
 
-    :param internal: (bool) True nếu là Internal Order Blocks
-    """
-    order_blocks = internalOrderBlocks if internal else swingOrderBlocks
+#     :param internal: (bool) True nếu là Internal Order Blocks
+#     """
+#     order_blocks = internalOrderBlocks if internal else swingOrderBlocks
 
-    for index in range(len(order_blocks) - 1, -1, -1):  # Lặp ngược để tránh lỗi khi xóa phần tử
-        each_order_block = order_blocks[index]
-        crossed_order_block = False
+#     for index in range(len(order_blocks) - 1, -1, -1):  # Lặp ngược để tránh lỗi khi xóa phần tử
+#         each_order_block = order_blocks[index]
+#         crossed_order_block = False
 
-        if bearishOrderBlockMitigationSource > each_order_block.barHigh and each_order_block.bias == BEARISH_LEG:
-            crossed_order_block = True
-        elif bullishOrderBlockMitigationSource < each_order_block.barLow and each_order_block.bias == BULLISH_LEG:
-            crossed_order_block = True
+#         if bearishOrderBlockMitigationSource > each_order_block.barHigh and each_order_block.bias == BEARISH_LEG:
+#             crossed_order_block = True
+#         elif bullishOrderBlockMitigationSource < each_order_block.barLow and each_order_block.bias == BULLISH_LEG:
+#             crossed_order_block = True
 
-        if crossed_order_block:
-            order_blocks.pop(index)
+#         if crossed_order_block:
+#             order_blocks.pop(index)
 
+# # 📌 Hàm lưu Order Blocks
+# def store_order_block(pivot, internal=False, bias=BULLISH_LEG):
+#     """
+#     Lưu trữ Order Blocks mới.
 
-# 📌 Hàm lưu Order Blocks
-def store_order_block(pivot, internal=False, bias=BULLISH_LEG):
-    """
-    Lưu trữ Order Blocks mới.
+#     :param pivot: (Pivot) Điểm pivot cơ sở
+#     :param internal: (bool) True nếu là Internal Order Blocks
+#     :param bias: (int) BULLISH (+1) hoặc BEARISH (-1)
+#     """
+#     if (not internal and showSwingOrderBlocksInput) or (internal and showInternalOrderBlocksInput):
+#         order_blocks = internalOrderBlocks if internal else swingOrderBlocks
 
-    :param pivot: (Pivot) Điểm pivot cơ sở
-    :param internal: (bool) True nếu là Internal Order Blocks
-    :param bias: (int) BULLISH (+1) hoặc BEARISH (-1)
-    """
-    if (not internal and showSwingOrderBlocksInput) or (internal and showInternalOrderBlocksInput):
-        order_blocks = internalOrderBlocks if internal else swingOrderBlocks
+#         # Kiểm tra xem pivot.barIndex có hợp lệ không
+#         if pivot.barIndex is None or pivot.barIndex >= len(parsedHighs) or pivot.barIndex >= len(parsedLows):
+#             print("Invalid pivot data to compute Order Block")
+#             return  # Bỏ qua nếu không đủ dữ liệu
 
-        # Kiểm tra xem pivot.barIndex có hợp lệ không
-        if pivot.barIndex is None or pivot.barIndex >= len(parsedHighs) or pivot.barIndex >= len(parsedLows):
-            print("Invalid pivot data to compute Order Block")
-            return  # Bỏ qua nếu không đủ dữ liệu
+#         # Xác định chỉ mục `parsed_index`
+#         if bias == BEARISH_LEG:
+#             sliced_highs = parsedHighs[pivot.barIndex:currentBarIndex]
+#             if sliced_highs:
+#                 parsed_index = pivot.barIndex + sliced_highs.index(max(sliced_highs))
+#             else:
+#                 print("No data to compute Order Block")
+#                 return  # Không có dữ liệu để tính toán
+#         else:
+#             sliced_lows = parsedLows[pivot.barIndex:currentBarIndex]
+#             if sliced_lows:
+#                 parsed_index = pivot.barIndex + sliced_lows.index(min(sliced_lows))
+#             else:
+#                 print("No data to compute Order Block")
+#                 return  # Không có dữ liệu để tính toán
 
-        # Xác định chỉ mục `parsed_index`
-        if bias == BEARISH_LEG:
-            sliced_highs = parsedHighs[pivot.barIndex:currentBarIndex]
-            if sliced_highs:
-                parsed_index = pivot.barIndex + sliced_highs.index(max(sliced_highs))
-            else:
-                print("No data to compute Order Block")
-                return  # Không có dữ liệu để tính toán
-        else:
-            sliced_lows = parsedLows[pivot.barIndex:currentBarIndex]
-            if sliced_lows:
-                parsed_index = pivot.barIndex + sliced_lows.index(min(sliced_lows))
-            else:
-                print("No data to compute Order Block")
-                return  # Không có dữ liệu để tính toán
+#         # Kiểm tra xem parsed_index có hợp lệ không
+#         if parsed_index >= len(parsedHighs) or parsed_index >= len(parsedLows) or parsed_index >= len(times):
+#             print("Invalid data to compute Order Block")
+#             return  # Bỏ qua nếu dữ liệu không hợp lệ
 
-        # Kiểm tra xem parsed_index có hợp lệ không
-        if parsed_index >= len(parsedHighs) or parsed_index >= len(parsedLows) or parsed_index >= len(times):
-            print("Invalid data to compute Order Block")
-            return  # Bỏ qua nếu dữ liệu không hợp lệ
+#         # Tạo Order Block mới
+#         new_order_block = OrderBlock(
+#             parsedHighs[parsed_index],
+#             parsedLows[parsed_index],
+#             times[parsed_index],
+#             bias
+#         )
 
-        # Tạo Order Block mới
-        new_order_block = OrderBlock(
-            parsedHighs[parsed_index],
-            parsedLows[parsed_index],
-            times[parsed_index],
-            bias
-        )
+#         print("New Order Block Created:", new_order_block)
 
-        print("New Order Block Created:", new_order_block)
+#         # Giữ danh sách Order Blocks dưới 100 phần tử
+#         if len(order_blocks) >= 100:
+#             order_blocks.pop()
 
-        # Giữ danh sách Order Blocks dưới 100 phần tử
-        if len(order_blocks) >= 100:
-            order_blocks.pop()
+#         # Thêm Order Block vào danh sách
+#         order_blocks.insert(0, new_order_block)
 
-        # Thêm Order Block vào danh sách
-        order_blocks.insert(0, new_order_block)
+# # 📌 Hàm vẽ Order Blocks dưới dạng hộp (box)
+# def draw_order_blocks(internal=False):
+#     """
+#     Vẽ Order Blocks dưới dạng hộp.
 
+#     :param internal: (bool) True nếu là Internal Order Blocks
+#     """
+#     order_blocks = internalOrderBlocks if internal else swingOrderBlocks
+#     order_blocks_size = len(order_blocks)
 
+#     if order_blocks_size > 0:
+#         max_order_blocks = internalOrderBlocksSizeInput if internal else swingOrderBlocksSizeInput
+#         parsed_order_blocks = order_blocks[: min(max_order_blocks, order_blocks_size)]
+#         boxes = internalOrderBlocksBoxes if internal else swingOrderBlocksBoxes
 
-# 📌 Hàm vẽ Order Blocks dưới dạng hộp (box)
-def draw_order_blocks(internal=False):
-    """
-    Vẽ Order Blocks dưới dạng hộp.
+#         for index, each_order_block in enumerate(parsed_order_blocks):
+#             order_block_color = (
+#                 MONO_BEARISH if each_order_block.bias == BEARISH else MONO_BULLISH
+#                 if styleInput == MONOCHROME
+#                 else internalBearishOrderBlockColor
+#                 if internal and each_order_block.bias == BEARISH
+#                 else internalBullishOrderBlockColor
+#                 if internal
+#                 else swingBearishOrderBlockColor
+#                 if each_order_block.bias == BEARISH
+#                 else swingBullishOrderBlockColor
+#             )
 
-    :param internal: (bool) True nếu là Internal Order Blocks
-    """
-    order_blocks = internalOrderBlocks if internal else swingOrderBlocks
-    order_blocks_size = len(order_blocks)
-
-    if order_blocks_size > 0:
-        max_order_blocks = internalOrderBlocksSizeInput if internal else swingOrderBlocksSizeInput
-        parsed_order_blocks = order_blocks[: min(max_order_blocks, order_blocks_size)]
-        boxes = internalOrderBlocksBoxes if internal else swingOrderBlocksBoxes
-
-        for index, each_order_block in enumerate(parsed_order_blocks):
-            order_block_color = (
-                MONO_BEARISH if each_order_block.bias == BEARISH else MONO_BULLISH
-                if styleInput == MONOCHROME
-                else internalBearishOrderBlockColor
-                if internal and each_order_block.bias == BEARISH
-                else internalBullishOrderBlockColor
-                if internal
-                else swingBearishOrderBlockColor
-                if each_order_block.bias == BEARISH
-                else swingBullishOrderBlockColor
-            )
-
-            boxes[index] = {
-                "top_left": (each_order_block.barTime, each_order_block.barHigh),
-                "bottom_right": ("last_bar_time", each_order_block.barLow),
-                "border_color": None if internal else order_block_color,
-                "bgcolor": order_block_color,
-            }
+#             boxes[index] = {
+#                 "top_left": (each_order_block.barTime, each_order_block.barHigh),
+#                 "bottom_right": ("last_bar_time", each_order_block.barLow),
+#                 "border_color": None if internal else order_block_color,
+#                 "bgcolor": order_block_color,
+#             }
 
 
-# 📌 Hàm phát hiện và vẽ cấu trúc, đồng thời lưu trữ Order Blocks
-def display_structure(internal=False):
-    """
-    Phát hiện và vẽ cấu trúc, đồng thời lưu Order Blocks.
+# # 📌 Hàm phát hiện và vẽ cấu trúc, đồng thời lưu trữ Order Blocks
+# def display_structure(internal=False):
+#     """
+#     Phát hiện và vẽ cấu trúc, đồng thời lưu Order Blocks.
 
-    :param internal: (bool) True nếu là cấu trúc nội bộ
-    """
-    bullish_bar, bearish_bar = True, True
+#     :param internal: (bool) True nếu là cấu trúc nội bộ
+#     """
+#     bullish_bar, bearish_bar = True, True
 
-    if internalFilterConfluenceInput:
-        bullish_bar = highs[-1] - max(closes[-1], opens[-1]) > min(closes[-1], opens[-1] - lows[-1])
-        bearish_bar = highs[-1] - max(closes[-1], opens[-1]) < min(closes[-1], opens[-1] - lows[-1])
+#     if internalFilterConfluenceInput:
+#         bullish_bar = highs[-1] - max(closes[-1], opens[-1]) > min(closes[-1], opens[-1] - lows[-1])
+#         bearish_bar = highs[-1] - max(closes[-1], opens[-1]) < min(closes[-1], opens[-1] - lows[-1])
 
-    pivot = internalHigh if internal else swingHigh
-    trend = internalTrend if internal else swingTrend
+#     pivot = internalHigh if internal else swingHigh
+#     trend = internalTrend if internal else swingTrend
 
-    line_style = "dashed" if internal else "solid"
-    label_size = internalStructureSize if internal else swingStructureSize
-    extra_condition = internal and internalHigh.currentLevel != swingHigh.currentLevel and bullish_bar
-    bullish_color = MONO_BULLISH if styleInput == MONOCHROME else internalBullColorInput if internal else swingBullColorInput
+#     line_style = "dashed" if internal else "solid"
+#     label_size = internalStructureSize if internal else swingStructureSize
+#     extra_condition = internal and internalHigh.currentLevel != swingHigh.currentLevel and bullish_bar
+#     bullish_color = MONO_BULLISH if styleInput == MONOCHROME else internalBullColorInput if internal else swingBullColorInput
 
-    if closes[-1] > pivot.currentLevel and not pivot.crossed and extra_condition:
-        tag = CHOCH if trend.bias == BEARISH else BOS
-        pivot.crossed = True
-        trend.bias = BULLISH
+#     if closes[-1] > pivot.currentLevel and not pivot.crossed and extra_condition:
+#         tag = CHOCH if trend.bias == BEARISH else BOS
+#         pivot.crossed = True
+#         trend.bias = BULLISH
 
-        if internal:
-            currentAlerts.internalBullishCHoCH = tag == CHOCH
-            currentAlerts.internalBullishBOS = tag == BOS
-        else:
-            currentAlerts.swingBullishCHoCH = tag == CHOCH
-            currentAlerts.swingBullishBOS = tag == BOS
+#         if internal:
+#             currentAlerts.internalBullishCHoCH = tag == CHOCH
+#             currentAlerts.internalBullishBOS = tag == BOS
+#         else:
+#             currentAlerts.swingBullishCHoCH = tag == CHOCH
+#             currentAlerts.swingBullishBOS = tag == BOS
 
-        if showStructureInput:
-            draw_structure(pivot, tag, bullish_color, line_style, "label_down", label_size)
+#         if showStructureInput:
+#             draw_structure(pivot, tag, bullish_color, line_style, "label_down", label_size)
 
-        if (internal and showInternalOrderBlocksInput) or (not internal and showSwingOrderBlocksInput):
-            store_order_block(pivot, internal, BULLISH)
+#         if (internal and showInternalOrderBlocksInput) or (not internal and showSwingOrderBlocksInput):
+#             store_order_block(pivot, internal, BULLISH)
 
-    pivot = internalLow if internal else swingLow
-    extra_condition = internal and internalLow.currentLevel != swingLow.currentLevel and bearish_bar
-    bearish_color = MONO_BEARISH if styleInput == MONOCHROME else internalBearColorInput if internal else swingBearColorInput
+#     pivot = internalLow if internal else swingLow
+#     extra_condition = internal and internalLow.currentLevel != swingLow.currentLevel and bearish_bar
+#     bearish_color = MONO_BEARISH if styleInput == MONOCHROME else internalBearColorInput if internal else swingBearColorInput
 
-    if closes[-1] < pivot.currentLevel and not pivot.crossed and extra_condition:
-        tag = CHOCH if trend.bias == BULLISH else BOS
-        pivot.crossed = True
-        trend.bias = BEARISH
+#     if closes[-1] < pivot.currentLevel and not pivot.crossed and extra_condition:
+#         tag = CHOCH if trend.bias == BULLISH else BOS
+#         pivot.crossed = True
+#         trend.bias = BEARISH
 
-        if internal:
-            currentAlerts.internalBearishCHoCH = tag == CHOCH
-            currentAlerts.internalBearishBOS = tag == BOS
-        else:
-            currentAlerts.swingBearishCHoCH = tag == CHOCH
-            currentAlerts.swingBearishBOS = tag == BOS
+#         if internal:
+#             currentAlerts.internalBearishCHoCH = tag == CHOCH
+#             currentAlerts.internalBearishBOS = tag == BOS
+#         else:
+#             currentAlerts.swingBearishCHoCH = tag == CHOCH
+#             currentAlerts.swingBearishBOS = tag == BOS
 
-        if showStructureInput:
-            draw_structure(pivot, tag, bearish_color, line_style, "label_up", label_size)
+#         if showStructureInput:
+#             draw_structure(pivot, tag, bearish_color, line_style, "label_up", label_size)
 
-        if (internal and showInternalOrderBlocksInput) or (not internal and showSwingOrderBlocksInput):
-            store_order_block(pivot, internal, BEARISH)
+#         if (internal and showInternalOrderBlocksInput) or (not internal and showSwingOrderBlocksInput):
+#             store_order_block(pivot, internal, BEARISH)
 
 # 📌 Hàm vẽ Fair Value Gap Box
 def fair_value_gap_box(left_time, right_time, top_price, bottom_price, box_color):
@@ -766,7 +763,6 @@ def fair_value_gap_box(left_time, right_time, top_price, bottom_price, box_color
         "bottom_right": (right_time + fairValueGapsExtendInput * (times[-1] - times[-2]), bottom_price),
         "color": box_color
     }
-
 
 # 📌 Hàm xóa Fair Value Gaps
 def delete_fair_value_gaps():
@@ -911,8 +907,6 @@ def draw_high_low_swings():
 
     return {"top_line": top_line, "bottom_line": bottom_line, "top_label": top_label, "bottom_label": bottom_label}
 
-import math
-
 # 📌 Hàm vẽ vùng giá với nhãn và hộp
 def draw_zone(label_level, label_index, top, bottom, tag, zone_color, style):
     """
@@ -943,7 +937,6 @@ def draw_zone(label_level, label_index, top, bottom, tag, zone_color, style):
     }
 
     return {"box": box_data, "label": label_data}
-
 
 # 📌 Hàm vẽ vùng Premium/Discount
 def draw_premium_discount_zones():

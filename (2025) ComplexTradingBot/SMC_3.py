@@ -11,7 +11,12 @@ from typing import List, Optional
 # Danh sách lưu trữ các đối tượng vẽ trên biểu đồ
 fig = go.Figure()
 
-# 📌 Định nghĩa màu sắc
+BULLISH_LEG = 1
+BEARISH_LEG = 0
+
+BULLISH = +1
+BEARISH = -1
+
 GREEN = "#089981"
 RED = "#F23645"
 BLUE = "#2157f3"
@@ -19,41 +24,64 @@ GRAY = "#878b94"
 MONO_BULLISH = "#b2b5be"
 MONO_BEARISH = "#5d606b"
 
-# 📌 Định nghĩa kiểu đường nét
-SOLID = "⎯⎯⎯"
-DASHED = "----"
-DOTTED = "····"
+HISTORICAL = 'Historical'
+PRESENT = 'Present'
 
-# 📌 Constants (định nghĩa giá trị Bearish/Bullish Leg)
-BULLISH_LEG = 1
-BEARISH_LEG = 0
+COLORED = "Colored"
+MONOCHROME = "Monochrome"
 
+ALL = 'All'
+BOS = 'BOS'
+CHOCH = 'CHoCH'
+
+TINY = "tiny"
+SMALL = "small"
+NORMAL = "normal"
+
+# TINY                            = size.tiny
+# SMALL                           = size.small
+# NORMAL                          = size.normal
+
+ATR = "Atr"
+RANGE = "Cumulative Mean Range"
+
+CLOSE = 'Close'
+HIGHLOW = 'High/Low'
+
+SOLID = '⎯⎯⎯'
+DASHED = '----'
+DOTTED = '····'
+
+# //---------------------------------------------------------------------------------------------------------------------}
+# //DATA STRUCTURES & VARIABLES
+# //---------------------------------------------------------------------------------------------------------------------{
+    
 # 📌 Cấu hình chung
 config = {
-    "mode": "Historical",
-    "style": "Colored",
+    "mode": HISTORICAL,
+    "style": COLORED,
     "show_trend": False
 }
 
 # 📌 Cấu hình Internal Structure
 internal_structure = {
     "show_internals": True,
-    "bullish_structure": "All",
+    "bullish_structure": ALL,
     "bullish_color": GREEN,
-    "bearish_structure": "All",
+    "bearish_structure": ALL,
     "bearish_color": RED,
     "internal_filter_confluence": False,
-    "label_size": "tiny"
+    "label_size": TINY
 }
 
 # 📌 Cấu hình Swing Structure
 swing_structure = {
     "show_structure": True,
-    "bullish_structure": "All",
+    "bullish_structure": ALL,
     "bullish_color": GREEN,
-    "bearish_structure": "All",
+    "bearish_structure": ALL,
     "bearish_color": RED,
-    "swing_label_size": "small",
+    "label_size": SMALL,
     "show_swings": False,
     "swings_length": 50,
     "show_high_low_swings": True
@@ -65,8 +93,8 @@ order_blocks = {
     "internal_order_blocks_size": 5,
     "show_swing_order_blocks": False,
     "swing_order_blocks_size": 5,
-    "order_block_filter": "Atr",
-    "order_block_mitigation": "High/Low",
+    "order_block_filter": ATR,
+    "order_block_mitigation": HIGHLOW,
     "internal_bullish_color": "#3179f5",
     "internal_bearish_color": "#f77c80",
     "swing_bullish_color": "#1848cc",
@@ -78,7 +106,7 @@ equal_highs_lows = {
     "show": True,
     "length": 3,
     "threshold": 0.1,
-    "label_size": "tiny"
+    "label_size": TINY
 }
 
 # 📌 Cấu hình Fair Value Gaps
@@ -112,17 +140,26 @@ premium_discount_zones = {
     "discount_zone_color": GREEN
 }
 
-# 📌 Tổng hợp tất cả cấu hình vào dictionary chính
-settings = {
-    "config": config,
-    "internal_structure": internal_structure,
-    "swing_structure": swing_structure,
-    "order_blocks": order_blocks,
-    "equal_highs_lows": equal_highs_lows,
-    "fair_value_gaps": fair_value_gaps,
-    "highs_lows_mtf": highs_lows_mtf,
-    "premium_discount_zones": premium_discount_zones
-}
+
+# 📌 Định nghĩa cấu trúc cảnh báo (Alerts)
+@dataclass
+class Alerts:
+    internalBullishBOS: bool = False
+    internalBearishBOS: bool = False
+    internalBullishCHoCH: bool = False
+    internalBearishCHoCH: bool = False
+    swingBullishBOS: bool = False
+    swingBearishBOS: bool = False
+    swingBullishCHoCH: bool = False
+    swingBearishCHoCH: bool = False
+    internalBullishOrderBlock: bool = False
+    internalBearishOrderBlock: bool = False
+    swingBullishOrderBlock: bool = False
+    swingBearishOrderBlock: bool = False
+    equalHighs: bool = False
+    equalLows: bool = False
+    bullishFairValueGap: bool = False
+    bearishFairValueGap: bool = False
 
 # 📌 Định nghĩa cấu trúc cực trị (Trailing Extremes)
 @dataclass
@@ -148,6 +185,12 @@ class FairValueGap:
 class Trend:
     bias: int  # BULLISH (+1) hoặc BEARISH (-1)
 
+# 📌 Định nghĩa cấu trúc Equal Display để lưu label và line
+@dataclass
+class EqualDisplay:
+    line: Optional[object] = None
+    label: Optional[object] = None
+
 # 📌 Định nghĩa Pivot Point (Swing Point)
 @dataclass
 class Pivot:
@@ -164,132 +207,159 @@ class OrderBlock:
     barLow: float
     barTime: int
     bias: int  # BULLISH (+1) hoặc BEARISH (-1)
-
-# 📌 Định nghĩa cấu trúc Equal Display để lưu label và line
-@dataclass
-class EqualDisplay:
-    line: Optional[object] = None
-    label: Optional[object] = None
     
 # 📌 Biến toàn cục
 swingHigh = Pivot()
+
 swingLow = Pivot()
+
 internalHigh = Pivot()
+
 internalLow = Pivot()
+
 equalHigh = Pivot()
+
 equalLow = Pivot()
+
 swingTrend = Trend(0)
+
 internalTrend = Trend(0)
+
 equalHighDisplay = EqualDisplay()
+
 equalLowDisplay = EqualDisplay()
 
-equalHighsLowsThresholdInput = 0.1  
-showSwingsInput = True  
-internalFilterConfluenceInput = False  
-fairValueGapsThresholdInput = 0.05  
-showSwingOrderBlocksInput = True  
-showInternalOrderBlocksInput = True  
-swingOrderBlocksSizeInput = 5 
-fairValueGapsExtendInput = 1 
+equalHighsLowsThresholdInput = 0.1
 
-# 📌 Danh sách chứa dữ liệu
 fairValueGaps: List[FairValueGap] = []
+
 parsedHighs: List[float] = []
+
 parsedLows: List[float] = []
+
 highs: List[float] = []
+
 lows: List[float] = []
+
 times: List[int] = []
+
 trailing = TrailingExtremes()
+
 swingOrderBlocks: List[OrderBlock] = []
+
 internalOrderBlocks: List[OrderBlock] = []
-swingOrderBlocksBoxes: List[object] = []  # Giả định hộp giá trị sẽ được hiển thị bằng thư viện khác
+
+swingOrderBlocksBoxes: List[object] = []
+
 internalOrderBlocksBoxes: List[object] = []
 
-# 📌 Chỉ số thanh hiện tại
-currentBarIndex = 0
-lastBarIndex = 0
+# Màu sắc đơn sắc (monochrome)
+MONO_BULLISH = "#b2b5be"  # Màu mặc định cho xu hướng tăng trong chế độ đơn sắc
+MONO_BEARISH = "#5d606b"  # Màu mặc định cho xu hướng giảm trong chế độ đơn sắc
 
-# 📌 Thời gian ban đầu của biểu đồ
-initialTime = 0 
+# Định nghĩa màu sắc theo phong cách
+COLOR_SCHEME = {
+    "swingBullishColor": {"monochrome": MONO_BULLISH, "colored": "#089981"},
+    "swingBearishColor": {"monochrome": MONO_BEARISH, "colored": "#F23645"},
+    "fairValueGapBullishColor": {"monochrome": MONO_BULLISH, "colored": "#00ff68"},
+    "fairValueGapBearishColor": {"monochrome": MONO_BEARISH, "colored": "#ff0008"},
+    "premiumZoneColor": {"monochrome": MONO_BEARISH, "colored": "#F23645"},
+    "discountZoneColor": {"monochrome": MONO_BULLISH, "colored": "#089981"},
+}
 
-# 📌 Thiết lập nguồn dữ liệu cho Order Block Mitigation
-orderBlockMitigationInput = "High/Low"
-CLOSE = "Close"
-HIGH = "High"
-LOW = "Low" 
+# Xác định chế độ hiển thị màu sắc
+styleInput = MONOCHROME  # Hoặc COLORED
 
-bearishOrderBlockMitigationSource = HIGH if orderBlockMitigationInput == CLOSE else HIGH
-bullishOrderBlockMitigationSource = LOW if orderBlockMitigationInput == CLOSE else LOW
+# Gán giá trị màu sắc dựa trên chế độ hiển thị
+swingBullishColor = COLOR_SCHEME["swingBullishColor"]["monochrome"] if styleInput == MONOCHROME else COLOR_SCHEME["swingBullishColor"]["colored"]
+swingBearishColor = COLOR_SCHEME["swingBearishColor"]["monochrome"] if styleInput == MONOCHROME else COLOR_SCHEME["swingBearishColor"]["colored"]
+fairValueGapBullishColor = COLOR_SCHEME["fairValueGapBullishColor"]["monochrome"] if styleInput == MONOCHROME else COLOR_SCHEME["fairValueGapBullishColor"]["colored"]
+fairValueGapBearishColor = COLOR_SCHEME["fairValueGapBearishColor"]["monochrome"] if styleInput == MONOCHROME else COLOR_SCHEME["fairValueGapBearishColor"]["colored"]
+premiumZoneColor = COLOR_SCHEME["premiumZoneColor"]["monochrome"] if styleInput == MONOCHROME else COLOR_SCHEME["premiumZoneColor"]["colored"]
+discountZoneColor = COLOR_SCHEME["discountZoneColor"]["monochrome"] if styleInput == MONOCHROME else COLOR_SCHEME["discountZoneColor"]["colored"]
+
+currentAlerts = Alerts()
+
+def initialize_order_blocks(showSwingOrderBlocks, showInternalOrderBlocks, swingOrderBlocksSize, internalOrderBlocksSize):
+    if showSwingOrderBlocks:
+        for _ in range(swingOrderBlocksSize):
+            swingOrderBlocksBoxes.append(None)  # Giả lập hộp giá trị
+    if showInternalOrderBlocks:
+        for _ in range(internalOrderBlocksSize):
+            internalOrderBlocksBoxes.append(None)
+
+# # Xác định nguồn sử dụng trong Bearish Order Blocks Mitigation
+# bearishOrderBlockMitigationSource = CLOSE if orderBlockMitigationInput == CLOSE else HIGH
+
+# # Xác định nguồn sử dụng trong Bullish Order Blocks Mitigation
+# bullishOrderBlockMitigationSource = CLOSE if orderBlockMitigationInput == CLOSE else LOW
+
+# Trích xuất giá trị order_block_mitigation từ dictionary
+orderBlockMitigationInput = order_blocks.get("order_block_mitigation", "CLOSE")  # Mặc định là "CLOSE" nếu không tìm thấy
+
+# Xác định nguồn sử dụng trong Bearish Order Blocks Mitigation
+bearishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == "CLOSE" else "High"
+
+# Xác định nguồn sử dụng trong Bullish Order Blocks Mitigation
+bullishOrderBlockMitigationSource = "Close" if orderBlockMitigationInput == "CLOSE" else "Low"
+
+import numpy as np
 
 def compute_atr(highs, lows, closes, period=200):
-    """
-    Tính Average True Range (ATR)
-    :param highs: Mảng giá cao
-    :param lows: Mảng giá thấp
-    :param closes: Mảng giá đóng cửa
-    :param period: Số chu kỳ ATR
-    :return: Giá trị ATR mới nhất hoặc None nếu không đủ dữ liệu
-    """
     # Kiểm tra đầu vào
     if len(highs) != len(lows) or len(highs) != len(closes):
         raise ValueError("Lengths of highs, lows, and closes must be the same.")
 
-    if len(highs) < period:
-        print(f"Not enough data to compute ATR for period={period}.")
+    if len(highs) < period + 1:
+        print(f"Not enough data to compute ATR for period={period}. Require at least {period+1} data points.")
         return None
 
+    # Tính True Range (TR) theo chuẩn
     tr = np.maximum(
-        highs[:-1] - lows[:-1],
+        highs[1:] - lows[1:], 
         np.maximum(
-            np.abs(highs[:-1] - closes[:-1]),
-            np.abs(lows[:-1] - closes[:-1])
+            np.abs(highs[1:] - closes[:-1]), 
+            np.abs(lows[1:] - closes[:-1])
         )
     )
 
-    # Tính ATR bằng numpy (SMA)
+    # Kiểm tra lại số lượng TR có đủ cho chu kỳ ATR không
     if len(tr) < period:
-        print(f"Not enough data to compute ATR for period={period}. At least {period} data points are required.")
+        print(f"Not enough TR values to compute ATR for period={period}.")
         return None
+
+    # Tính ATR (SMA của các giá trị TR)
     atr = np.mean(tr[-period:])
     return atr if not np.isnan(atr) else None
 
-# Khởi tạo các biến cần thiết
-atrMeasure = compute_atr(np.array(highs), np.array(lows), np.array(closes), 200) if len(highs) > 0 else 0
-
-ATR = "Atr"
-RANGE = "Cumulative Mean Range"
-
-orderBlockFilterInput = ATR
-volatilityMeasure = (
-    compute_atr(np.array(highs), np.array(lows), np.array(highs), 200)
-    if orderBlockFilterInput == ATR
-    else np.cumsum(np.abs(np.array(highs) - np.array(lows))) / max(1, currentBarIndex + 1)
-)
 
 # 📌 Xác định thanh có độ biến động cao
 def is_high_volatility_bar(high, low, volatilityMeasure):
     return (high - low) >= (2 * volatilityMeasure)
 
-# 📌 Lấy giá cao/thấp đã xử lý
-highVolatilityBar = is_high_volatility_bar(1.2, 1.0, volatilityMeasure)  # Ví dụ
-parsedHigh = 1.0 if highVolatilityBar else 1.2
-parsedLow = 1.2 if highVolatilityBar else 1.0
+# //---------------------------------------------------------------------------------------------------------------------}
+# //USER-DEFINED FUNCTIONS
+# //---------------------------------------------------------------------------------------------------------------------{
 
-# 📌 Lưu trữ dữ liệu mới vào danh sách
-parsedHighs.append(parsedHigh)
-parsedLows.append(parsedLow)
-highs.append(1.2)  # Dữ liệu giả lập
-lows.append(1.0)
-times.append(100)  # Cần lấy từ dữ liệu thực tế
+# 📌 Hàm lấy giá trị của current leg (bearish = 0, bullish = 1)
+def leg(size, highs, lows):
+    if len(highs) < size or len(lows) < size:
+        return None  # Tránh lỗi khi không đủ dữ liệu
+
+    highest_high = max(highs[-size:])  # Tìm giá cao nhất trong cửa sổ
+    lowest_low = min(lows[-size:])  # Tìm giá thấp nhất trong cửa sổ
+
+    new_leg_high = highs[-1] > highest_high
+    new_leg_low = lows[-1] < lowest_low
+
+    if new_leg_high:
+        return BEARISH_LEG
+    elif new_leg_low:
+        return BULLISH_LEG
+    return 0  # Nếu không có thay đổi, giữ nguyên giá trị cũ
 
 # 📌 Hàm kiểm tra có phải điểm bắt đầu của leg mới hay không
 def start_of_new_leg(leg_values):
-    """
-    Xác định xem có phải điểm bắt đầu của leg mới không
-    
-    :param leg_values: (list) Danh sách các giá trị leg
-    :return: (bool) True nếu có thay đổi leg
-    """
     if len(leg_values) < 2:
         print("⚠️ Lỗi: Không đủ dữ liệu để xác định leg mới.")
         return False  # Không có đủ dữ liệu để so sánh
@@ -298,12 +368,6 @@ def start_of_new_leg(leg_values):
 
 # 📌 Hàm kiểm tra có phải điểm bắt đầu của Bearish Leg (Swing Down)
 def start_of_bearish_leg(leg_values):
-    """
-    Xác định xem có phải điểm bắt đầu của một bearish leg không
-    
-    :param leg_values: (list) Danh sách các giá trị leg
-    :return: (bool) True nếu có sự thay đổi từ bullish → bearish
-    """
     if len(leg_values) < 2:
         print("⚠️ Lỗi: Không đủ dữ liệu để xác định leg mới.")
         return False
@@ -312,19 +376,16 @@ def start_of_bearish_leg(leg_values):
 
 # 📌 Hàm kiểm tra có phải điểm bắt đầu của Bullish Leg (Swing Up)
 def start_of_bullish_leg(leg_values):
-    """
-    Xác định xem có phải điểm bắt đầu của một bullish leg không
-    
-    :param leg_values: (list) Danh sách các giá trị leg
-    :return: (bool) True nếu có sự thay đổi từ bearish → bullish
-    """
     if len(leg_values) < 2:
         print("⚠️ Lỗi: Không đủ dữ liệu để xác định leg mới.")
         return False
     
     return (leg_values[-2] == BEARISH_LEG) and (leg_values[-1] == BULLISH_LEG)
 
-def draw_label(label_time, label_price, tag, label_color, label_style, mode="Present", text_size=12, x_offset=0, y_offset=0):
+def draw_label(label_time, 
+            label_price, tag, label_color, 
+            label_style, mode=PRESENT, 
+            text_size=12, x_offset=0, y_offset=0):
     """
     Vẽ một nhãn trên biểu đồ bằng Plotly.
 
@@ -340,7 +401,7 @@ def draw_label(label_time, label_price, tag, label_color, label_style, mode="Pre
     """
 
     # Nếu ở chế độ "Present", xóa nhãn cũ trước khi vẽ
-    if mode == "Present":
+    if mode == PRESENT:
         fig.data = []  # Xóa tất cả dữ liệu cũ
 
     fig.add_trace(go.Scatter(
@@ -352,7 +413,8 @@ def draw_label(label_time, label_price, tag, label_color, label_style, mode="Pre
         textfont=dict(color=label_color, size=text_size)
     ))
 
-def draw_equal_high_low(pivot, level, size, equal_high, mode="Present", line_width=1, line_dash="dot", text_size=12):
+def draw_equal_high_low(pivot, level, size, equal_high, 
+                        mode=PRESENT, line_width=1, line_dash="dot", text_size=12):
     """
     Vẽ Equal High (EQH) hoặc Equal Low (EQL) bằng Plotly.
 
@@ -371,7 +433,7 @@ def draw_equal_high_low(pivot, level, size, equal_high, mode="Present", line_wid
     label_style = "label_down" if equal_high else "label_up"
 
     # Nếu ở chế độ "Present", xóa line & label cũ
-    if mode == "Present":
+    if mode == PRESENT:
         fig.data = []  # Xóa tất cả dữ liệu cũ
 
     # Vẽ đường Equal High/Low
@@ -386,33 +448,8 @@ def draw_equal_high_low(pivot, level, size, equal_high, mode="Present", line_wid
     # Vẽ nhãn EQH/EQL
     draw_label(times[size], level, tag, color, label_style, text_size=text_size)
 
-# 📌 Hàm lấy giá trị của current leg (bearish = 0, bullish = 1)
-def leg(size, highs, lows):
-    """
-    Xác định giá trị leg hiện tại (0: bearish, 1: bullish)
-    
-    :param size: (int) Độ dài của cửa sổ kiểm tra
-    :param highs: (list) Danh sách giá cao (high)
-    :param lows: (list) Danh sách giá thấp (low)
-    :return: (int) 0 nếu Bearish, 1 nếu Bullish
-    """
-    if len(highs) < size or len(lows) < size:
-        return None  # Tránh lỗi khi không đủ dữ liệu
-
-    highest_high = max(highs[-size:])  # Tìm giá cao nhất trong cửa sổ
-    lowest_low = min(lows[-size:])  # Tìm giá thấp nhất trong cửa sổ
-
-    new_leg_high = highs[-1] > highest_high
-    new_leg_low = lows[-1] < lowest_low
-
-    if new_leg_high:
-        return BEARISH_LEG
-    elif new_leg_low:
-        return BULLISH_LEG
-    return 0  # Nếu không có thay đổi, giữ nguyên giá trị cũ
-
 # 📌 Hàm xác định cấu trúc hiện tại và điểm xoay (swing points)
-def get_current_structure(size, equal_high_low=False, internal=False):
+def get_current_structure(size, atrMeasure, equal_high_low=False, internal=False):
     """
     Lưu trữ cấu trúc hiện tại và trailing swing points.
     
@@ -420,13 +457,11 @@ def get_current_structure(size, equal_high_low=False, internal=False):
     :param equal_high_low: (bool) Hiển thị Equal Highs/Lows
     :param internal: (bool) Xác định cấu trúc nội bộ
     """
+    
     current_leg = leg(size)  # Xác định trạng thái leg
     new_pivot = start_of_new_leg([current_leg])  # Kiểm tra điểm xoay mới
     pivot_low = start_of_bullish_leg([current_leg])  # Kiểm tra bullish pivot
     pivot_high = start_of_bearish_leg([current_leg])  # Kiểm tra bearish pivot
-
-    swingBullishColor = "#F23645" 
-    swingBearishColor = "#089981"
     
     if new_pivot:
         if pivot_low:
@@ -451,7 +486,7 @@ def get_current_structure(size, equal_high_low=False, internal=False):
                 trailing.lastBottomTime = p_ivot.barTime
 
             # Hiển thị swing points nếu được bật
-            if showSwingsInput and not internal and not equal_high_low:
+            if swing_structure.get("show_swings", None) and not internal and not equal_high_low:
                 draw_label(
                     times[size],
                     p_ivot.currentLevel,
@@ -482,7 +517,7 @@ def get_current_structure(size, equal_high_low=False, internal=False):
                 trailing.lastTopTime = p_ivot.barTime
 
             # Hiển thị swing points nếu được bật
-            if showSwingsInput and not internal and not equal_high_low:
+            if swing_structure.get("show_swings", None) and not internal and not equal_high_low:
                 draw_label(
                     times[size],
                     p_ivot.currentLevel,
@@ -491,7 +526,8 @@ def get_current_structure(size, equal_high_low=False, internal=False):
                     "label_down"
                 )
                 
-def draw_structure(pivot, tag, structure_color, line_style, label_style, label_size, mode="Present"):
+def draw_structure(pivot, tag, structure_color, line_style, 
+                label_style, label_size, mode=PRESENT):
     """
     Vẽ đường và nhãn đại diện cho một cấu trúc bằng Plotly.
 
@@ -506,7 +542,7 @@ def draw_structure(pivot, tag, structure_color, line_style, label_style, label_s
     """
 
     # Nếu ở chế độ "Present", xóa dữ liệu cũ trước khi vẽ mới
-    if mode == "Present":
+    if mode == PRESENT:
         fig.data = []  # Xóa tất cả dữ liệu cũ
 
     # Vẽ đường cấu trúc
@@ -531,8 +567,227 @@ def draw_structure(pivot, tag, structure_color, line_style, label_style, label_s
         textposition="top center" if label_style == "label_up" else "bottom center",
         textfont=dict(color=structure_color, size=label_size)
     ))
-    
-     
+
+# 📌 Hàm xóa Order Blocks
+def delete_order_blocks(internal=False):
+    """
+    Xóa các order blocks nếu bị cắt ngang.
+
+    :param internal: (bool) True nếu là Internal Order Blocks
+    """
+    order_blocks = internalOrderBlocks if internal else swingOrderBlocks
+
+    for index in range(len(order_blocks) - 1, -1, -1):  # Lặp ngược để tránh lỗi khi xóa phần tử
+        each_order_block = order_blocks[index]
+        crossed_order_block = False
+
+        if bearishOrderBlockMitigationSource > each_order_block.barHigh and each_order_block.bias == BEARISH:
+            crossed_order_block = True
+        elif bullishOrderBlockMitigationSource < each_order_block.barLow and each_order_block.bias == BULLISH:
+            crossed_order_block = True
+
+        if crossed_order_block:
+            order_blocks.pop(index)
+
+# 📌 Hàm lưu Order Blocks
+def store_order_block(pivot, currentBarIndex, internal=False, bias=BULLISH):
+    """
+    Lưu trữ Order Blocks mới.
+
+    :param pivot: (Pivot) Điểm pivot cơ sở
+    :param internal: (bool) True nếu là Internal Order Blocks
+    :param bias: (int) BULLISH (+1) hoặc BEARISH (-1)
+    """
+    if (not internal and order_blocks.get("show_swing_order_blocks")) or (internal and order_blocks.get("show_internal_order_blocks")):
+        order_blocks = internalOrderBlocks if internal else swingOrderBlocks
+
+        # Kiểm tra xem pivot.barIndex có hợp lệ không
+        if pivot.barIndex is None or pivot.barIndex >= len(parsedHighs) or pivot.barIndex >= len(parsedLows):
+            print("Invalid pivot data to compute Order Block")
+            return  # Bỏ qua nếu không đủ dữ liệu
+
+        # Xác định chỉ mục `parsed_index`
+        if bias == BEARISH:
+            sliced_highs = parsedHighs[pivot.barIndex:currentBarIndex]
+            if sliced_highs:
+                parsed_index = pivot.barIndex + sliced_highs.index(max(sliced_highs))
+            else:
+                print("No data to compute Order Block")
+                return  # Không có dữ liệu để tính toán
+        else:
+            sliced_lows = parsedLows[pivot.barIndex:currentBarIndex]
+            if sliced_lows:
+                parsed_index = pivot.barIndex + sliced_lows.index(min(sliced_lows))
+            else:
+                print("No data to compute Order Block")
+                return  # Không có dữ liệu để tính toán
+
+        # Kiểm tra xem parsed_index có hợp lệ không
+        if parsed_index >= len(parsedHighs) or parsed_index >= len(parsedLows) or parsed_index >= len(times):
+            print("Invalid data to compute Order Block")
+            return  # Bỏ qua nếu dữ liệu không hợp lệ
+
+        # Tạo Order Block mới
+        new_order_block = OrderBlock(
+            parsedHighs[parsed_index],
+            parsedLows[parsed_index],
+            times[parsed_index],
+            bias
+        )
+
+        print("New Order Block Created:", new_order_block)
+
+        # Giữ danh sách Order Blocks dưới 100 phần tử
+        if len(order_blocks) >= 100:
+            order_blocks.pop()
+
+        # Thêm Order Block vào danh sách
+        order_blocks.insert(0, new_order_block)
+
+def draw_order_blocks(fig, internal=False):
+    """
+    Vẽ Order Blocks dưới dạng hộp (box) sử dụng Plotly.
+
+    :param fig: (plotly.graph_objects.Figure) Đối tượng biểu đồ để vẽ lên.
+    :param internal: (bool) True nếu là Internal Order Blocks.
+    """
+    # Chọn danh sách orderBlocks dựa vào giá trị internal
+    orderBlocks = internalOrderBlocks if internal else swingOrderBlocks
+
+    # Lấy kích thước của danh sách orderBlocks
+    order_blocks_size = len(orderBlocks)
+
+
+    if order_blocks_size > 0:
+        max_order_blocks = order_blocks.get("internal_order_blocks_size", None) if internal else order_blocks.get("swing_order_blocks_size", None)
+        parsed_order_blocks = order_blocks[:min(max_order_blocks, order_blocks_size)]
+        
+        for each_order_block in parsed_order_blocks:
+            order_block_color = (
+                MONO_BEARISH if each_order_block.bias == BEARISH else MONO_BULLISH
+                if styleInput == MONOCHROME
+                else order_blocks.get("internal_bearish_color", None)
+                if internal and each_order_block.bias == BEARISH
+                else order_blocks.get("internal_bullish_color", None)
+                if internal
+                else order_blocks.get("swing_bearish_color", None)
+                if each_order_block.bias == BEARISH
+                else order_blocks.get("swing_bullish_color", None)
+            )
+
+            # Vẽ hình chữ nhật (Order Block)
+            fig.add_trace(go.Scatter(
+                x=[each_order_block.barTime, each_order_block.barTime, "last_bar_time", "last_bar_time", each_order_block.barTime],
+                y=[each_order_block.barHigh, each_order_block.barLow, each_order_block.barLow, each_order_block.barHigh, each_order_block.barHigh],
+                fill="toself",
+                fillcolor=order_block_color,
+                line=dict(color=None if internal else order_block_color),
+                name="Internal Order Block" if internal else "Swing Order Block",
+                opacity=0.5
+            ))
+
+    return fig
+
+# 📌 Hàm phát hiện và vẽ cấu trúc thị trường bằng Plotly
+def display_structure(opens, closes, fig, internal=False):
+    """
+    Phát hiện và vẽ cấu trúc thị trường, đồng thời lưu Order Blocks bằng Plotly.
+
+    :param fig: (go.Figure) Đối tượng Figure của Plotly
+    :param internal: (bool) True nếu là cấu trúc nội bộ
+    """
+    bullish_bar, bearish_bar = True, True
+
+    if internal_structure.get("internal_filter_confluence", None):
+        bullish_bar = highs[-1] - max(closes[-1], opens[-1]) > min(closes[-1], opens[-1] - lows[-1])
+        bearish_bar = highs[-1] - max(closes[-1], opens[-1]) < min(closes[-1], opens[-1] - lows[-1])
+
+    pivot = internalHigh if internal else swingHigh
+    trend = internalTrend if internal else swingTrend
+
+    line_style = "dash" if internal else "solid"
+    label_size = internal_structure.get("label_size", None) if internal else swing_structure.get("label_size", None) 
+    extra_condition = internal and internalHigh.currentLevel != swingHigh.currentLevel and bullish_bar
+    bullish_color = MONO_BULLISH if styleInput == MONOCHROME else internal_structure.get("bullish_color", None) if internal else swing_structure.get("bullish_color", None)
+
+    # 📌 Xử lý Bullish Structure
+    if closes[-1] > pivot.currentLevel and not pivot.crossed and extra_condition:
+        tag = CHOCH if trend.bias == BEARISH else BOS
+        pivot.crossed = True
+        trend.bias = BULLISH
+
+        if internal:
+            currentAlerts.internalBullishCHoCH = tag == CHOCH
+            currentAlerts.internalBullishBOS = tag == BOS
+        else:
+            currentAlerts.swingBullishCHoCH = tag == CHOCH
+            currentAlerts.swingBullishBOS = tag == BOS
+
+        if swing_structure.get("show_structure", None):
+            # 📌 Vẽ đường cấu trúc Bullish
+            fig.add_trace(go.Scatter(
+                x=[pivot.barTime, times[-1]], 
+                y=[pivot.currentLevel, pivot.currentLevel],
+                mode="lines",
+                line=dict(color=bullish_color, width=2, dash=line_style),
+                name=f"{tag} - Bullish"
+            ))
+
+            # 📌 Thêm nhãn (Label)
+            fig.add_annotation(
+                x=times[-1], y=pivot.currentLevel,
+                text=tag,
+                showarrow=True,
+                arrowhead=2,
+                font=dict(color=bullish_color, size=label_size),
+                yshift=10
+            )
+
+        if (internal and order_blocks.get("show_internal_order_blocks", None)) or (not internal and order_blocks.get("show_swing_order_blocks", None)):
+            store_order_block(pivot, internal, BULLISH)
+
+    # 📌 Xử lý Bearish Structure
+    pivot = internalLow if internal else swingLow
+    extra_condition = internal and internalLow.currentLevel != swingLow.currentLevel and bearish_bar
+    bearish_color = MONO_BEARISH if styleInput == MONOCHROME else internal_structure.get("bearish_color", None) if internal else swing_structure.get("bearish_color", None)
+
+    if closes[-1] < pivot.currentLevel and not pivot.crossed and extra_condition:
+        tag = CHOCH if trend.bias == BULLISH else BOS
+        pivot.crossed = True
+        trend.bias = BEARISH
+
+        if internal:
+            currentAlerts.internalBearishCHoCH = tag == CHOCH
+            currentAlerts.internalBearishBOS = tag == BOS
+        else:
+            currentAlerts.swingBearishCHoCH = tag == CHOCH
+            currentAlerts.swingBearishBOS = tag == BOS
+
+        if swing_structure.get("show_structure", None):
+            # 📌 Vẽ đường cấu trúc Bearish
+            fig.add_trace(go.Scatter(
+                x=[pivot.barTime, times[-1]], 
+                y=[pivot.currentLevel, pivot.currentLevel],
+                mode="lines",
+                line=dict(color=bearish_color, width=2, dash=line_style),
+                name=f"{tag} - Bearish"
+            ))
+
+            # 📌 Thêm nhãn (Label)
+            fig.add_annotation(
+                x=times[-1], y=pivot.currentLevel,
+                text=tag,
+                showarrow=True,
+                arrowhead=2,
+                font=dict(color=bearish_color, size=label_size),
+                yshift=-10
+            )
+
+        if (internal and order_blocks.get("show_internal_order_blocks", None)) or (not internal and order_blocks.get("show_swing_order_blocks", None)):
+            store_order_block(pivot, internal, BEARISH)
+
+    return fig  # Trả về đối tượng figure đã cập nhật
+
 # Hàm main
 def main():
     df = yf.download("AAPL", start="2024-01-01", end="2025-02-03", interval="1d")
@@ -549,9 +804,76 @@ def main():
     })
     df_filtered.set_index("Date", inplace=True)
     print(df_filtered)
+    print("========================================")
     
+    # // we create the needed boxes for displaying order blocks at the first execution
+    # if barstate.isfirst
+    #     if showSwingOrderBlocksInput
+    #         for index = 1 to swingOrderBlocksSizeInput
+    #             swingOrderBlocksBoxes.push(box.new(na,na,na,na,xloc = xloc.bar_time,extend = extend.right))
+    #     if showInternalOrderBlocksInput
+    #         for index = 1 to internalOrderBlocksSizeInput
+    #             internalOrderBlocksBoxes.push(box.new(na,na,na,na,xloc = xloc.bar_time,extend = extend.right))
+    showSwingOrderBlocksInput = order_blocks.get("show_swing_order_blocks", False)
+    showInternalOrderBlocksInput = order_blocks.get("show_internal_order_blocks", True)
+    swingOrderBlocksSizeInput = order_blocks.get("swing_order_blocks_size", 5)
+    internalOrderBlocksSizeInput = order_blocks.get("internal_order_blocks_size", 5)
+    if not df_filtered.empty:
+        if "Close" in df_filtered.columns and not df_filtered["Close"].empty:
+                initialize_order_blocks(showSwingOrderBlocksInput, showInternalOrderBlocksInput, 
+                                        swingOrderBlocksSizeInput, internalOrderBlocksSizeInput)
+                draw_order_blocks(fig, internal=False)
+        else:
+            print("⚠️ Cảnh báo: df_filtered không có dữ liệu 'Close'. Không thể khởi tạo Order Blocks.")
+    else:
+        print("⚠️ Cảnh báo: df_filtered rỗng. Không thể khởi tạo Order Blocks.")
+
+    # Khởi tạo các biến cần thiết
+    atrMeasure = compute_atr(
+        df_filtered["High"].values,  
+        df_filtered["Low"].values,   
+        df_filtered["Close"].values, 
+        200
+    ) if not df_filtered.empty else 0
+    print("atrMeasure:" + str(atrMeasure))
+    print("========================================")
+
+    orderBlockFilterInput = ATR
+    
+    if not df_filtered.empty:
+        volatilityMeasure = (
+            compute_atr(
+                df_filtered["High"].values, 
+                df_filtered["Low"].values, 
+                df_filtered["Close"].values, 
+                200
+            ) if orderBlockFilterInput == ATR else 
+            np.cumsum(np.abs(df_filtered["High"].values - df_filtered["Low"].values)) / max(1, len(df_filtered))
+        )
+    else:
+        volatilityMeasure = 0
+
+    print("volatilityMeasure:" + str(volatilityMeasure))
+    
+    # 📌 Lấy giá cao/thấp đã xử lý
+    highVolatilityBar = is_high_volatility_bar(
+        df_filtered["High"].iloc[-1], 
+        df_filtered["Low"].iloc[-1], 
+        volatilityMeasure[-1] if isinstance(volatilityMeasure, np.ndarray) else volatilityMeasure
+    )
+
+    parsedHigh = df_filtered["Low"].iloc[-1] if highVolatilityBar else df_filtered["High"].iloc[-1]
+    parsedLow = df_filtered["High"].iloc[-1] if highVolatilityBar else df_filtered["Low"].iloc[-1]
+
+    # 📌 Lưu trữ dữ liệu mới vào danh sách
+    parsedHighs.append(parsedHigh)
+    parsedLows.append(parsedLow)
+    highs.append(df_filtered["High"].iloc[-1])
+    lows.append(df_filtered["Low"].iloc[-1])
+    times.append(df_filtered.index[-1])  
+
     # Hiển thị biểu đồ với các Equal Highs/Lows và nhãn
-    fig.show()
+    # fig.show()
     
 if __name__ == "__main__":
     main()
