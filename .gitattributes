@@ -1,1 +1,3 @@
 (2025)_ComplexTradingBot/*.py filter=git-crypt diff=git-crypt
+(2025)_TriangleHedgingForexBot/*.mq4 filter=git-crypt diff=git-crypt
+(2025)_TriangleHedgingForexBot/*.py filter=git-crypt diff=git-crypt
